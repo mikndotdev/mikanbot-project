@@ -12,7 +12,10 @@ export default {
         enabled: true,
         options: [],
     },
-    interactionRun: (interaction: CommandInteraction) => {
-        interaction.reply("Pong!");
+    interactionRun: async (interaction: CommandInteraction) => {
+        const ping = Math.abs(Math.round(interaction.client.ws.ping));
+        await interaction.reply("Loading...");
+        const roundtrip = Math.abs(Date.now() - interaction.createdTimestamp);
+        interaction.editReply(`API Latency: ${ping}ms\nRoundtrip: ${roundtrip}ms`);
     },
 };
