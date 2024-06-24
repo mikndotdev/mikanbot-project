@@ -16,6 +16,8 @@ export default {
         const ping = Math.abs(Math.round(interaction.client.ws.ping));
         await interaction.reply("Loading...");
         const roundtrip = Math.abs(Date.now() - interaction.createdTimestamp);
-        interaction.editReply(`API Latency: ${ping}ms\nRoundtrip: ${roundtrip}ms`);
+        interaction.editReply(
+            `API Latency: ${ping}ms\nRoundtrip: ${roundtrip}ms`,
+        );
     },
 };

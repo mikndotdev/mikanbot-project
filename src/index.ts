@@ -1,5 +1,6 @@
 import { deployCommands } from "./deploy";
 import { setPresence } from "./presence";
+import { handleCommand } from "./handlers/command";
 import { Client, GatewayIntentBits } from "discord.js";
 const client = new Client({
     intents: [
@@ -17,23 +18,8 @@ client.on("ready", () => {
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
-
-    try {
-        console.log(`Received command: ${interaction.commandName}`);
-        const commandModule = await import(
-            `./commands/${interaction.commandName}.ts`
-        );
-        const command = commandModule.default;
-        if (!command.slashCommand.enabled)
-            return interaction.reply("This command is not enabled!");
-        if (command.slashCommand.enabled) command.interactionRun(interaction);
-    } catch (error) {
-        console.error(error);
-        interaction.reply({
-            content: "There was an error while executing this command!",
-            ephemeral: true,
-        });
-    }
+    console.log(`Received command: ${interaction.commandName}`);
+    await handleCommand(interaction);
 });
 
 client.login(process.env.BOT_TOKEN);
