@@ -22,4 +22,8 @@ client.on("interactionCreate", async (interaction) => {
     await handleCommand(interaction);
 });
 
+client.on("messageCreate", async (message) => {
+    if (message.author.bot) return;
+
+
 client.login(process.env.BOT_TOKEN);

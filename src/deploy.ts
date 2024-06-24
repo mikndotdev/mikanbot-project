@@ -9,21 +9,26 @@ export function deployCommands() {
         try {
             console.log("Started refreshing application (/) commands.");
 
-            const commands = [];
             const commandFiles = fs
                 .readdirSync("./src/commands")
                 .filter((file) => file.endsWith(".ts"));
 
-            for (const file of commandFiles) {
-                const command = await import(
-                    path.resolve(`./src/commands/${file}`)
-                );
-                commands.push(command.default);
-            }
+            const commands = await Promise.all(
+                commandFiles.map(async (file) => {
+                    const command = await import(
+                        path.resolve(`./src/commands/${file}`)
+                    );
+                    return command.default;
+                }),
+            );
+
+            const commandDataArray = [];
 
             for (const command of commands) {
                 if (command.slashCommand.enabled) {
-                    console.log(`Registering ${command.name} command`);
+                    console.log(
+                        `Preparing ${command.name} command for registration`,
+                    );
 
                     const commandData = {
                         name: command.name,
@@ -31,16 +36,21 @@ export function deployCommands() {
                         options: command.slashCommand.options,
                     };
 
-                    await rest.put(
-                        Routes.applicationCommands(process.env.BOT_ID || ""),
-                        { body: [commandData] },
-                    );
+                    commandDataArray.push(commandData);
                 }
             }
 
-            console.log("Successfully reloaded application (/) commands.");
+            console.log(`Registering all commands`);
+
+            await rest.put(
+                Routes.applicationCommands(process.env.BOT_ID || ""),
+                { body: commandDataArray },
+            );
         } catch (error) {
-            console.error(error);
+            console.error(
+                "An error occurred while refreshing application commands:",
+                error,
+            );
         }
     })();
 }
