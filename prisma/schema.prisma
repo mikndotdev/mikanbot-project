@@ -24,8 +24,8 @@ model User {
 
 model guildLvl {
   id        String   @id
-  level     Int
-  xp        Int
+  level     String
+  xp        String
 }
 
 model server {
@@ -40,4 +40,6 @@ model server {
   autoRoleChannel String
   verificationRole String
   verificationChannel String
+  levelsEnabled Boolean
+  levelsMessage String
 }
