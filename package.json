@@ -1,23 +1,21 @@
 {
-  "name": "mikanbot-project",
-  "module": "index.ts",
-  "type": "module",
-  "scripts": {
-    "format": "biome format --write ."
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "prisma": "5.15.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@biomejs/biome": "^1.8.2",
-    "@prisma/client": "^5.15.1",
-    "canvafy": "^7.1.0",
-    "discord.js": "^14.15.3",
-    "elysia": "^1.0.25",
-    "quick.db": "^9.1.7"
-  }
+    "name": "mikanbot-project",
+    "module": "index.ts",
+    "type": "module",
+    "scripts": {
+        "format": "biome format --write ."
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "prisma": "5.15.1"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@biomejs/biome": "^1.8.2",
+        "@prisma/client": "^5.15.1",
+        "discord.js": "^14.15.3",
+        "elysia": "^1.1.5"
+    }
 }

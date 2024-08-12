@@ -25,6 +25,4 @@ export async function handleLevel(message: Message) {
     const xp = lvlDB?.xp;
     //@ts-ignore
     const lvl = lvlDB?.level;
-
-    
 }

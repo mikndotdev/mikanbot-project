@@ -18,6 +18,9 @@ export async function initGuild(guild: Guild) {
         });
     }
 
-    const channel = await guild.channels.create({ name: "bot-commands", type: ChannelType.GuildText });
+    const channel = await guild.channels.create({
+        name: "bot-commands",
+        type: ChannelType.GuildText,
+    });
     const id = channel.id;
 }
