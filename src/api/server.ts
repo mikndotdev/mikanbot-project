@@ -1,24 +1,51 @@
 import { Elysia } from "elysia";
+import { dmUser } from "..";
 
 const app = new Elysia();
 
 app.post("/accLink", async ({ query, body }) => {
-    const key = query.key
-    const json = body
+    const key = query.key;
+    const json = body as { uid: string; acc: string };
 
-    const uid = json.uid
-    const acc = json.acc
+    const uid = json.uid;
+    const acc = json.acc;
 
-    if(!key) return { status: 400, message: "No key provided" }
-    if(!uid) return { status: 400, message: "No uid provided" }
-    if(!acc) return { status: 400, message: "No acc provided" }
+    if (!key) return new Response("No key provided", { status: 400 });
+    if (!uid || !acc)
+        return new Response("Missing uid or account information", {
+            status: 400,
+        });
 
-    if(key !== process.env.API_SIGNING_KEY) return { status: 401, message: "Invalid key" }
+    if (key !== process.env.API_SIGNING_KEY)
+        return new Response("Invalid key", { status: 401 });
+});
 
-})
+app.post("/dm", async ({ query, body }) => {
+    const key = query.key;
+    const json = body as { provider: string; uid: string; message: string };
 
-export function start () {
+    if (!json) return new Response("No JSON body provided", { status: 400 });
+
+    const provider = json.provider;
+    const uid = json.uid;
+    const message = json.message;
+
+    if (!key) return new Response("No key provided", { status: 400 });
+    if (key !== process.env.API_SIGNING_KEY)
+        return new Response("Invalid key", { status: 401 });
+    if (!provider || !uid || !message)
+        return new Response("Missing provider, uid, or message", {
+            status: 400,
+        });
+
+    const response = await dmUser(uid, provider, message);
+    if (response instanceof Error)
+        return { status: 500, message: response.message };
+    return new Response("Message sent", { status: 200 });
+});
+
+export function start() {
     app.listen(process.env.API_PORT || 3000, () => {
-        console.log(`Server started on port ${process.env.API_PORT || 3000}`)
-    })
+        console.log(`Server started on port ${process.env.API_PORT || 3000}`);
+    });
 }

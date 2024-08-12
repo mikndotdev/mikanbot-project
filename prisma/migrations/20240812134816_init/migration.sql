@@ -3,8 +3,20 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "premium" BOOLEAN NOT NULL DEFAULT false,
     "premiumUntil" TIMESTAMP(3),
+    "levelCard" TEXT NOT NULL,
+    "rankColor" TEXT NOT NULL,
+    "mdUID" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "guildLvl" (
+    "id" TEXT NOT NULL,
+    "level" TEXT NOT NULL,
+    "xp" TEXT NOT NULL,
+
+    CONSTRAINT "guildLvl_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -20,6 +32,8 @@ CREATE TABLE "server" (
     "autoRoleChannel" TEXT NOT NULL,
     "verificationRole" TEXT NOT NULL,
     "verificationChannel" TEXT NOT NULL,
+    "levelsEnabled" BOOLEAN NOT NULL,
+    "levelsMessage" TEXT NOT NULL,
 
     CONSTRAINT "server_pkey" PRIMARY KEY ("id")
 );

@@ -11,21 +11,23 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
   id        String   @id
   premium   Boolean  @default(false)
   premiumUntil DateTime?
-  levelCard String
-  rankColor String
-  mdUID     String
+  levelCard String @default("https://cdn.mikn.dev/mikan-bg.png")
+  rankColor String @default("#FF7700")
+  mdUID     String @default("unlinked")
 }
 
 model guildLvl {
   id        String   @id
-  level     String
-  xp        String
+  level     Int
+  xp        Int
+  cooldown  DateTime @default(now())
 }
 
 model server {
