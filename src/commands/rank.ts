@@ -40,7 +40,7 @@ export default {
     },
     interactionRun: async (interaction: CommandInteraction) => {
         const username = interaction.user.displayName;
-        const avatar = `${interaction.user.displayAvatarURL()} + "?size=1024"`;
+        const avatar = `${interaction.user.displayAvatarURL()} + "&size=1024"`;
         const guildDB = await prisma.server.findUnique({
             where: {
                 id: interaction.guild?.id,
