@@ -14,6 +14,8 @@ export async function initGuild(guild: Guild) {
         await prisma.server.create({
             data: {
                 id: guild.id,
+                name: guild.name,
+                ownerId: guild.ownerId,
             },
         });
     }

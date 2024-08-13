@@ -33,15 +33,15 @@ model guildLvl {
 model server {
   id        String   @id
   name      String
-  ownerId   String
+  ownerId   String 
   premium   Boolean  @default(false)
   premiumUntil DateTime?
-  logChhannel String
-  prefix    String
-  autoRole  String
-  autoRoleChannel String
-  verificationRole String
-  verificationChannel String
-  levelsEnabled Boolean
-  levelsMessage String
+  logChannel String @default("none")
+  prefix    String @default("m?")
+  autoRole  String @default("none")
+  autoRoleChannel String @default("none")
+  verificationRole String @default("none")
+  verificationChannel String @default("none")
+  levelsEnabled Boolean @default(false)
+  levelsMessage String @default("Congratulations, {user}! You've leveled up to level {level}!")
 }

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import type { Message } from "discord.js";
+import { initGuild } from "./initGuild";
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,21 @@ export async function handleLevel(message: Message) {
         },
     });
 
+    const guildDB = await prisma.server.findUnique({
+        where: {
+            id: message.guild?.id,
+        },
+    });
+
+    if (!guildDB) {
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        await initGuild(message.guild!);
+    }
+
+    if (!guildDB?.levelsEnabled) {
+        return console.log("Levels are disabled in this server");
+    }
+
     if (!lvlDB) {
         await prisma.guildLvl.create({
             data: {
@@ -37,6 +53,7 @@ export async function handleLevel(message: Message) {
     }
 
     const increment = Math.floor(Math.random() * 10) + 15;
+    const levelMessage = guildDB?.levelsMessage;
 
     if (lvlDB) {
         const newXP = lvlDB.xp + increment;
@@ -44,9 +61,10 @@ export async function handleLevel(message: Message) {
         if (currentCooldown > new Date()) return;
         const cooldownTime = new Date(Date.now() + cooldown);
         const level = getLevelFromXP(newXP);
+        const lvlMessage = levelMessage?.replace(/{user}/g, message.author.toString()).replace( /{level}/g, level.toString());
         if (lvlDB.level < level) {
             message.channel.send(
-                `Congratulations ${message.author}, you have leveled up to level ${level}!`,
+                lvlMessage || `Congratulations ${message.author.toString()}! You have leveled up to level ${level}!`,
             );
         }
         await prisma.guildLvl.update({
