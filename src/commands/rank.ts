@@ -20,9 +20,13 @@ function getLevelFromXP(xp: number): number {
 
 function getXPfromLevel(level: number): number {
     let xp = 0;
+    let xpRequired = 50;
+
     for (let i = 1; i < level; i++) {
-        xp += 50 * 2 ** (i - 1);
+        xp += xpRequired;
+        xpRequired *= 2;
     }
+
     return xp;
 }
 
@@ -55,9 +59,10 @@ export default {
                 id: interaction.user.id,
             },
         });
-        const uid = userDb?.mdUID
-        const premium = userDb?.premium
-        const bg = userDb?.levelCard
+        const uid = userDb?.mdUID;
+        const premium = userDb?.premium;
+        const bg = userDb?.levelCard;
+        const color = userDb?.rankColor;
 
         const lvlDB = await prisma.guildLvl.findMany({
             where: {
@@ -68,24 +73,29 @@ export default {
             },
         });
 
-        const rank = lvlDB.findIndex((x) => x.id === `${interaction.guild?.id}-${interaction.user.id}`) + 1;
+        const rank =
+            lvlDB.findIndex(
+                (x) =>
+                    x.id === `${interaction.guild?.id}-${interaction.user.id}`,
+            ) + 1;
 
-        const userLevel = lvlDB.find((x) => x.id === `${interaction.guild?.id}-${interaction.user.id}`);
+        const userLevel = lvlDB.find(
+            (x) => x.id === `${interaction.guild?.id}-${interaction.user.id}`,
+        );
 
-        const level = userLevel?.level;
+        const level = userLevel?.level || 1;
         const xp = userLevel?.xp;
 
         const xpRequired = getXPfromLevel(level + 1);
 
-        const url = `${process.env.IMG_BACKEND}/level?level=${level}&username=${username}&currentXP=${xp}&totalXP=${xpRequired}&rank=${rank}&mdAcc=${uid !== "unlinked"}&premium=${premium}&avatar=${avatar}&bg=${bg}`;
+        const url = `${process.env.IMG_BACKEND}/level?level=${level}&username=${username}&currentXP=${xp}&totalXP=${xpRequired}&rank=${rank}&mdAcc=${uid !== "unlinked"}&premium=${premium}&avatar=${avatar}&bg=${bg}&color=${color}`;
 
         const response = await fetch(url);
-        
+
         const buffer = Buffer.from(await response.arrayBuffer());
 
-        const attachment = new AttachmentBuilder(buffer,{ name: "rank.png" });
+        const attachment = new AttachmentBuilder(buffer, { name: "rank.png" });
 
         interaction.editReply({ content: "", files: [attachment] });
     },
 };
-

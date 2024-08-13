@@ -1,6 +1,8 @@
 import { Elysia } from "elysia";
 import { dmUser } from "..";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 const app = new Elysia();
 
 app.post("/accLink", async ({ query, body }) => {
@@ -18,6 +20,27 @@ app.post("/accLink", async ({ query, body }) => {
 
     if (key !== process.env.API_SIGNING_KEY)
         return new Response("Invalid key", { status: 401 });
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: uid,
+        },
+    });
+
+    if (!user) return new Response("User not found", { status: 404 });
+
+    await prisma.user.update({
+        where: {
+            id: uid,
+        },
+        data: {
+            mdUID: acc,
+        },
+    });
+
+    await dmUser(uid, "MikanDev Accounts", `Your account has been linked!\n\n**MikanDev UID:** ${acc}\n**Discord ID:**${uid}`);
+
+    return new Response("Account linked", { status: 200 });
 });
 
 app.post("/dm", async ({ query, body }) => {

@@ -18,8 +18,8 @@ model User {
   id        String   @id
   premium   Boolean  @default(false)
   premiumUntil DateTime?
-  levelCard String @default("https://cdn.mikn.dev/mikan-bg.png")
-  rankColor String @default("#FF7700")
+  levelCard String @default("https://cdn.mikn.dev/bot-assets/mikanbot/default-lvlcard.png")
+  rankColor String @default("FF7700")
   mdUID     String @default("unlinked")
 }
 

@@ -61,10 +61,13 @@ export async function handleLevel(message: Message) {
         if (currentCooldown > new Date()) return;
         const cooldownTime = new Date(Date.now() + cooldown);
         const level = getLevelFromXP(newXP);
-        const lvlMessage = levelMessage?.replace(/{user}/g, message.author.toString()).replace( /{level}/g, level.toString());
+        const lvlMessage = levelMessage
+            ?.replace(/{user}/g, message.author.toString())
+            .replace(/{level}/g, level.toString());
         if (lvlDB.level < level) {
             message.channel.send(
-                lvlMessage || `Congratulations ${message.author.toString()}! You have leveled up to level ${level}!`,
+                lvlMessage ||
+                    `Congratulations ${message.author.toString()}! You have leveled up to level ${level}!`,
             );
         }
         await prisma.guildLvl.update({
