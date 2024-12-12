@@ -4,6 +4,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 import crypto from "node:crypto";
+import { setCommandRatelimit, checkCommandRatelimit } from "./ratelimit.ts";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -48,6 +49,8 @@ export async function handleCommand(interaction: CommandInteraction) {
             `../commands/${interaction.commandName}.ts`
         );
         const command = commandModule.default;
+        const limited = await checkCommandRatelimit("cmd", interaction, command.name);
+        if (limited) return interaction.reply({ content: "You are being ratelimited! Please wait a bit before using this command again.", ephemeral: true });
         if (!command.slashCommand.enabled)
             return interaction.reply("This command is not enabled!");
         if (command.isPremium && !premium)
@@ -55,6 +58,12 @@ export async function handleCommand(interaction: CommandInteraction) {
                 "This command is only available for premium users!",
             );
         if (command.slashCommand.enabled) command.interactionRun(interaction);
+        if (premium) {
+            setCommandRatelimit("cmd", interaction, command.PremiumCooldown || command.cooldown, command.name);
+        }
+        if (!premium) {
+            setCommandRatelimit("cmd", interaction, command.cooldown, command.name);
+        }
     } catch (error) {
         const logId = await sendLog(error.message);
         console.error(`Error while executing command: ${logId}`);

@@ -3,7 +3,7 @@ import type { CommandInteraction } from "discord.js";
 export default {
     name: "ping",
     description: "Replies with Pong!",
-    cooldown: 0,
+    cooldown: 5,
     isPremium: false,
     botPermissions: [],
     userPermissions: [],
