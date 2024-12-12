@@ -1,6 +1,5 @@
 import { type CommandInteraction, AttachmentBuilder } from "discord.js";
 import { PrismaClient } from "@prisma/client";
-import { start } from "../api/server";
 
 const prisma = new PrismaClient();
 

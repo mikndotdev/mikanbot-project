@@ -38,7 +38,11 @@ app.post("/accLink", async ({ query, body }) => {
         },
     });
 
-    await dmUser(uid, "MikanDev Accounts", `Your account has been linked!\n\n**MikanDev UID:** ${acc}\n**Discord ID:**${uid}`);
+    await dmUser(
+        uid,
+        "MikanDev Accounts",
+        `Your account has been linked!\n\n**MikanDev UID:** ${acc}\n**Discord ID:**${uid}`,
+    );
 
     return new Response("Account linked", { status: 200 });
 });

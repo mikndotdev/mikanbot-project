@@ -39,7 +39,11 @@ client.on("ready", () => {
 client.on("interactionCreate", async (interaction) => {
     if (interaction.isCommand()) {
         console.log(`Received command: ${interaction.commandName}`);
-        await handleCommand(interaction);
+        try {
+            await handleCommand(interaction);
+        } catch (e) {
+            console.error(e);
+        }
     }
     if (interaction.isButton()) {
         console.log(`Received button: ${interaction.customId}`);
