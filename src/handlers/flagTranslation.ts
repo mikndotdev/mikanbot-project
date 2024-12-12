@@ -47,6 +47,8 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
     const result = await translate
         .translate(message.content, language)
         .catch((error) => {
+            message.reactions.removeAll();
+            message.react("❌");
             console.error("Translation error: ", error);
             return null;
         });
