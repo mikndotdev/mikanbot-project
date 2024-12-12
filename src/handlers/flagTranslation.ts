@@ -59,7 +59,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         .setDescription(translation)
         .setColor("#FF7700")
         .setTimestamp();
-    await message.reply({ embeds: [embed] });
+    await message.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
     message.reactions.removeAll();
     const userDb = await prisma.user.findUnique({
         where: {
