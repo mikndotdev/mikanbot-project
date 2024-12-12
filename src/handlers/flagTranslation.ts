@@ -49,10 +49,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         console.error("Message content is empty or undefined.");
         return;
     }
-    message.react("🔄");
+    message.react("<a:loading:1272805571585642506>");
     if (message.attachments.size > 0) {
         if (message.attachments.first()?.contentType?.startsWith("image")) {
-            message.react("<:caughtin4k:1275020056543236158>");
+            message.react("<:camera:1316791863172268132>");
             const attachment = message.attachments.first();
             if (!attachment) return;
             const visionResult = await vision.annotateImage({
