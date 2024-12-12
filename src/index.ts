@@ -3,14 +3,26 @@ import { deployCommands } from "./deploy";
 import { setPresence } from "./presence";
 import { handleCommand } from "./handlers/command";
 import { handleLevel } from "./handlers/lvl";
-import { Client, GatewayIntentBits, EmbedBuilder } from "discord.js";
+import { translateMessage } from "./handlers/flagTranslation";
+import { emojiCountryCode } from "country-code-emoji";
+import {
+    Client,
+    GatewayIntentBits,
+    Partials,
+    EmbedBuilder,
+    MessageReaction,
+} from "discord.js";
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.DirectMessageReactions,
     ],
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 export async function dmUser(id: string, provider: string, message: string) {
@@ -34,6 +46,28 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user?.tag}!`);
     deployCommands();
     setPresence(client);
+});
+
+client.on("messageReactionAdd", async (reaction: MessageReaction, user) => {
+    if (user.bot) return;
+    if (reaction.partial) {
+        try {
+            await reaction.fetch();
+        } catch (error) {
+            console.error(
+                "Something went wrong when fetching the message: ",
+                error,
+            );
+            return;
+        }
+    }
+    try {
+        if (emojiCountryCode(reaction.emoji.name)) {
+            await translateMessage(reaction, user);
+        }
+    } catch (error) {
+        return;
+    }
 });
 
 client.on("interactionCreate", async (interaction) => {

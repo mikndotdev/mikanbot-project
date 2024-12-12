@@ -15,7 +15,9 @@
     "dependencies": {
         "@baselime/pino-transport": "^0.1.5",
         "@biomejs/biome": "^1.8.2",
+        "@google-cloud/translate": "^8.5.0",
         "@prisma/client": "^6.0.1",
+        "country-code-emoji": "^2.3.0",
         "discord.js": "^14.15.3",
         "elysia": "^1.1.5",
         "pino": "^9.5.0",
