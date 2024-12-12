@@ -1,8 +1,12 @@
-const { QuickDB, MemoryDriver } = require("quick.db");
-const memoryDriver = new MemoryDriver();
-const db = new QuickDB({ driver: memoryDriver });
+import { createClient } from "redis";
+import { type CommandInteraction } from "discord.js";
 
-export default function setRatelimit(type, time, user) {
+const redis = createClient({
+    url: process.env.REDIS_URL,
+});
+
+export default function setRatelimit(type: string, interaction: CommandInteraction) {
     if (type == "msg") {
+
     }
 }
