@@ -1,10 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import { setMessageRatelimit, checkMessageRatelimit } from "./ratelimit.ts";
 import type { Message } from "discord.js";
 import { initGuild } from "./initGuild";
 
 const prisma = new PrismaClient();
-
-const cooldown = 5000;
 
 function getLevelFromXP(xp: number): number {
     let level = 1;
@@ -56,10 +55,9 @@ export async function handleLevel(message: Message) {
     const levelMessage = guildDB?.levelsMessage;
 
     if (lvlDB) {
+        const limited = await checkMessageRatelimit("msg", message);
+        if (limited) return;
         const newXP = lvlDB.xp + increment;
-        const currentCooldown = lvlDB.cooldown;
-        if (currentCooldown > new Date()) return;
-        const cooldownTime = new Date(Date.now() + cooldown);
         const level = getLevelFromXP(newXP);
         const lvlMessage = levelMessage
             ?.replace(/{user}/g, message.author.toString())
@@ -77,8 +75,8 @@ export async function handleLevel(message: Message) {
             data: {
                 xp: newXP,
                 level: level,
-                cooldown: cooldownTime,
             },
         });
+        setMessageRatelimit("msg", message);
     }
 }

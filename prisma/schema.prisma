@@ -23,10 +23,9 @@ model User {
 }
 
 model guildLvl {
-  id       String   @id
-  level    Int
-  xp       Int
-  cooldown DateTime @default(now())
+  id    String @id
+  level Int
+  xp    Int
 }
 
 model server {

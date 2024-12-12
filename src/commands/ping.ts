@@ -14,7 +14,7 @@ export default {
     },
     interactionRun: async (interaction: CommandInteraction) => {
         const ping = Math.abs(Math.round(interaction.client.ws.ping));
-        await interaction.reply("Loading...");
+        await interaction.reply("<a:loading:1272805571585642506>");
         const roundtrip = Math.abs(Date.now() - interaction.createdTimestamp);
         interaction.editReply(
             `API Latency: ${ping}ms\nRoundtrip: ${roundtrip}ms`,
