@@ -1,4 +1,5 @@
 import { Translate } from "@google-cloud/translate/build/src/v2";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { emojiCountryCode } from "country-code-emoji";
 import { MessageReaction, Message, User, EmbedBuilder } from "discord.js";
 import {
@@ -38,6 +39,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
             "MikanBot",
             "You are being ratelimited! Please wait a bit before translating another message. You can speed this up by becoming a premium user.",
         );
+        return;
     }
     if (!message.content) {
         console.error("Message content is empty or undefined.");
