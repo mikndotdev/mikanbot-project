@@ -32,7 +32,7 @@ function getXPfromLevel(level: number): number {
 export default {
     name: "rank",
     description: "Check your rank!",
-    cooldown: 0,
+    cooldown: 3,
     isPremium: false,
     botPermissions: [],
     userPermissions: [],

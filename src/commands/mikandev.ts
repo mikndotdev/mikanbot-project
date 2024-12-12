@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 export default {
     name: "mikandev",
     description: "Manage your MikanDev account",
-    cooldown: 0,
+    cooldown: 3,
     isPremium: false,
     botPermissions: [],
     userPermissions: [],
