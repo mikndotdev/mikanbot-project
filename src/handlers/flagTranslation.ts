@@ -21,6 +21,10 @@ const translate = new Translate({
     key: process.env.GOOGLE_API_KEY as string,
 });
 
+const vision = new ImageAnnotatorClient({
+    apiKey: process.env.GOOGLE_API_KEY as string,
+})
+
 const prisma = new PrismaClient();
 
 export async function translateMessage(reaction: MessageReaction, user: User) {
@@ -41,21 +45,67 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         );
         return;
     }
-    if (!message.content) {
+    if (!message.content && message.attachments.size === 0) {
         console.error("Message content is empty or undefined.");
         return;
     }
-    message.react("<a:loading:1272805571585642506>");
-    const result = await translate
+    message.react("🔄");
+    if (message.attachments.size > 0) {
+        if (message.attachments.first()?.contentType?.startsWith("image")) {
+            message.react("<:caughtin4k:1275020056543236158>");
+            const attachment = message.attachments.first();
+            if (!attachment) return;
+            const visionResult = await vision.annotateImage({
+                image: {
+                    source: {
+                        imageUri: attachment.url,
+                    },
+                },
+                features: [{ type: "TEXT_DETECTION" }],
+            })
+            const [image] = visionResult;
+            if (!image.textAnnotations) {
+                message.reactions.removeAll();
+                return message.react("❌");
+            }
+            const text = image.textAnnotations[0].description;
+            const translationResult = await translate
+                .translate(text, language)
+                .catch((error) => {
+                    message.reactions.removeAll();
+                    message.react("❌");
+                    return null;
+                });
+            if (!translationResult) return;
+            const [translation] = translationResult;
+            const embed = new EmbedBuilder()
+                .setTitle("Translation to " + reaction.emoji.name)
+                .setDescription(translation)
+                .setColor("#FF7700")
+                .setTimestamp();
+            await message.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
+            message.reactions.removeAll();
+            const userDb = await prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                },
+            });
+            if (userDb?.premium) {
+                setTranslationRatelimit("translate", user.id, 10);
+            } else {
+                setTranslationRatelimit("translate", user.id, 60);
+            }
+        }
+    }
+    const translationResult = await translate
         .translate(message.content, language)
         .catch((error) => {
             message.reactions.removeAll();
             message.react("❌");
-            console.error("Translation error: ", error);
             return null;
         });
-    if (!result) return;
-    const [translation] = result;
+    if (!translationResult) return;
+    const [translation] = translationResult;
     const embed = new EmbedBuilder()
         .setTitle("Translation to " + reaction.emoji.name)
         .setDescription(translation)
