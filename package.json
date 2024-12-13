@@ -17,6 +17,7 @@
     "dependencies": {
         "@baselime/pino-transport": "^0.1.5",
         "@biomejs/biome": "^1.8.2",
+        "@elysiajs/swagger": "^1.1.6",
         "@google-cloud/translate": "^8.5.0",
         "@google-cloud/vision": "^4.3.2",
         "@prisma/client": "^6.0.1",
