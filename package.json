@@ -1,9 +1,11 @@
 {
     "name": "mikanbot-project",
-    "module": "index.ts",
+    "module": "src/index.ts",
     "type": "module",
     "scripts": {
-        "format": "biome format --write ."
+        "format": "biome format --write .",
+        "start": "bun src/index.ts",
+        "dev": "bun --watch src/index.ts"
     },
     "devDependencies": {
         "@types/bun": "latest",
