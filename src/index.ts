@@ -4,6 +4,7 @@ import { setPresence } from "./presence";
 import { handleCommand } from "./handlers/command";
 import { handleLevel } from "./handlers/lvl";
 import { translateMessage } from "./handlers/flagTranslation";
+import { xfix } from "./handlers/xfix.ts";
 import { emojiCountryCode } from "country-code-emoji";
 import {
     Client,
@@ -22,6 +23,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.DirectMessageReactions,
+        GatewayIntentBits.MessageContent,
     ],
     partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
@@ -88,7 +90,13 @@ client.on("interactionCreate", async (interaction) => {
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
     console.log("Received message!");
-    await handleLevel(message);
+    handleLevel(message);
+    if (
+        message.content.startsWith("https://x.com/") ||
+        message.content.startsWith("https://twitter.com/")
+    ) {
+        xfix(message);
+    }
 });
 
 client.on("guildCreate", async (guild) => {});

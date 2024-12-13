@@ -43,4 +43,5 @@ model server {
   levelsEnabled       Boolean   @default(false)
   levelsMessage       String    @default("Congratulations, {user}! You've leveled up to level {level}!")
   flagTrans           Boolean   @default(false)
+  xfix                Boolean   @default(true)
 }
