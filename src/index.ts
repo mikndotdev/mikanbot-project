@@ -11,6 +11,7 @@ import {
     Partials,
     EmbedBuilder,
     MessageReaction,
+    type User,
 } from "discord.js";
 
 const client = new Client({
@@ -62,8 +63,8 @@ client.on("messageReactionAdd", async (reaction: MessageReaction, user) => {
         }
     }
     try {
-        if (emojiCountryCode(reaction.emoji.name)) {
-            await translateMessage(reaction, user);
+        if (emojiCountryCode(reaction.emoji.name as string)) {
+            await translateMessage(reaction, user as User);
         }
     } catch (error) {
         return;

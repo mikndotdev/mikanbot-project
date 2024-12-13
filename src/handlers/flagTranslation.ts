@@ -23,11 +23,18 @@ const translate = new Translate({
 
 const vision = new ImageAnnotatorClient({
     apiKey: process.env.GOOGLE_API_KEY as string,
-})
+});
 
 const prisma = new PrismaClient();
 
 export async function translateMessage(reaction: MessageReaction, user: User) {
+    const server = reaction.message.guildId;
+    const serverData = await prisma.server.findUnique({
+        where: {
+            id: server as string,
+        },
+    });
+    if (!serverData?.flagTrans) return;
     const country = emojiCountryCode(reaction.emoji.name as string);
     const language = countryToLanguage(country);
     if (!language) {
@@ -40,7 +47,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         message.reactions.removeAll();
         await dmUser(
             user.id,
-            "MikanBot",
+            "MikanBot Flag Translation",
             "You are being ratelimited! Please wait a bit before translating another message. You can speed this up by becoming a premium user.",
         );
         return;
@@ -62,7 +69,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
                     },
                 },
                 features: [{ type: "TEXT_DETECTION" }],
-            })
+            });
             const [image] = visionResult;
             if (!image.textAnnotations) {
                 message.reactions.removeAll();
@@ -83,7 +90,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
                 .setDescription(translation)
                 .setColor("#FF7700")
                 .setTimestamp();
-            await message.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
+            await message.reply({
+                embeds: [embed],
+                allowedMentions: { repliedUser: false },
+            });
             message.reactions.removeAll();
             const userDb = await prisma.user.findUnique({
                 where: {
@@ -111,7 +121,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         .setDescription(translation)
         .setColor("#FF7700")
         .setTimestamp();
-    await message.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
+    await message.reply({
+        embeds: [embed],
+        allowedMentions: { repliedUser: false },
+    });
     message.reactions.removeAll();
     const userDb = await prisma.user.findUnique({
         where: {
