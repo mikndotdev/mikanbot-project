@@ -34,6 +34,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64
+          attests: false
           context: .
           push: true
           tags: |
@@ -68,6 +69,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/arm64
+          attests: false
           context: .
           push: true
           tags: |
