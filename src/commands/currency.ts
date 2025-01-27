@@ -8,11 +8,12 @@ import {
     ApplicationCommandOptionType,
 } from "discord.js";
 
+import fs from "node:fs";
+
+const data = fs.readFileSync("./src/currencies.json", "utf-8");
+const currencies = JSON.parse(data);
+
 const currencyToName = async (code: string) => {
-    const data = await fetch(
-        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json",
-    );
-    const currencies = await data.json();
     return currencies[code];
 };
 
@@ -79,7 +80,7 @@ export default {
             });
         }
 
-        const final = amount * rate;
+        const final = (amount * rate).toFixed(2);
 
         const embed = new EmbedBuilder()
             .setTitle("Currency Conversion")
