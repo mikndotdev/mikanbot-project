@@ -24,8 +24,10 @@ export const xfix = async (message: Message) => {
 
     let url = messageURL[0];
 
+    if (url.split("/").length === 4) return;
+
     url = url
-        .replace("https://x.com", "https://fixupx.com")
+        .replace("https://x.com", "https://girlcockx.com")
         .replace("https://twitter.com", "https://twittpr.com");
 
     await message.suppressEmbeds(true);
