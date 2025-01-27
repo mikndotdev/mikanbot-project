@@ -58,7 +58,7 @@ export default {
         if (!fromName || !toName) {
             return interaction.reply({
                 content:
-                    "Invalid currency codes. A list of valid codes can be found [here](https://www.iban.com/currency-codes)",
+                    "Invalid currency codes. A list of valid codes can be found [here](<https://www.iban.com/currency-codes>)",
                 ephemeral: true,
             });
         }
