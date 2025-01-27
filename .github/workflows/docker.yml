@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-amd64:
+  build:
     runs-on: ubuntu-24.04
     env:
       IMAGE_NAME: mikanbot
@@ -30,46 +30,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Build and push (AMD64)
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64
-          attests: false
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-  build-arm64:
-    runs-on: ubuntu-24.04-arm
-    env:
-      IMAGE_NAME: mikanbot
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/arm64
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Build and push (ARM64)
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/arm64
-          attests: false
+          platforms: linux/amd64,linux/arm64
           context: .
           push: true
           tags: |
