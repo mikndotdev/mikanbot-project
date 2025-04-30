@@ -5,6 +5,7 @@ import { handleCommand } from "./handlers/command";
 import { handleLevel } from "./handlers/lvl";
 import { translateMessage } from "./handlers/flagTranslation";
 import { xfix } from "./handlers/xfix.ts";
+import { instafix } from "./handlers/instafix.ts";
 import { emojiCountryCode } from "country-code-emoji";
 import {
     Client,
@@ -96,6 +97,12 @@ client.on("messageCreate", async (message) => {
         message.content.startsWith("https://twitter.com/")
     ) {
         xfix(message);
+    }
+    if (
+        message.content.startsWith("https://instagram.com/") ||
+        message.content.startsWith("https://www.instagram.com/")
+    ) {
+        instafix(message);
     }
 });
 
