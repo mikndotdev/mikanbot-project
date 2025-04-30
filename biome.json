@@ -15,5 +15,10 @@
         "indentWidth": 4,
         "indentStyle": "space",
         "ignore": [".prisma/"]
+    },
+    "javascript": {
+        "formatter": {
+            "bracketSpacing": true
+        }
     }
 }
