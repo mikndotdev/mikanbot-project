@@ -3,6 +3,10 @@
 FROM oven/bun:latest AS base
 WORKDIR /usr/src/app
 
+# OpenSSL is required for Prisma to connect to databases
+RUN apt update
+RUN apt install -y openssl
+
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM base AS install
