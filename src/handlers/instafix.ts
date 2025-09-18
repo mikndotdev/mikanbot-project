@@ -27,8 +27,8 @@ export const instafix = async (message: Message) => {
     if (url.split("/").length === 4) return;
 
     url = url
-        .replace("https://instagram.com", "https://ddinstagram.com")
-        .replace("https://www.instagram.com", "https://ddinstagram.com");
+        .replace("https://instagram.com", "https://eeinstagram.com")
+        .replace("https://www.instagram.com", "https://eeinstagram.com");
 
     await message.suppressEmbeds(true);
 
