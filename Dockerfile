@@ -14,14 +14,15 @@ RUN mkdir -p /temp/dev
 COPY package.json bun.lockb /temp/dev/
 RUN cd /temp/dev && bun install --frozen-lockfile
 
-# copy Prisma schema and generate Prisma client
-COPY prisma /temp/dev/prisma
-RUN cd /temp/dev && bunx prisma generate
-
 # copy source files and build the binary
 FROM base AS build
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
+
+# Generate Prisma client before building
+RUN bunx prisma generate
+
+# Build the binary
 RUN bun run build
 
 # create minimal runtime image
