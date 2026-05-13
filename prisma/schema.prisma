@@ -6,11 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -44,4 +44,6 @@ model server {
   levelsMessage       String    @default("Congratulations, {user}! You've leveled up to level {level}!")
   flagTrans           Boolean   @default(false)
   xfix                Boolean   @default(true)
+  preferredLocale     String    @default("EN")
+  xfixAutoTranslate   Boolean   @default(false)
 }
