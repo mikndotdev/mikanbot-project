@@ -20,7 +20,7 @@ COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 # Generate Prisma client before building
-RUN bunx prisma generate
+RUN bunx --bun prisma generate
 
 # Build the binary
 RUN bun run build
