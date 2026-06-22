@@ -1,5 +1,11 @@
+import { Translate } from "@google-cloud/translate/build/src/v2";
 import type { Message } from "discord.js";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
+
+const translate = new Translate({
+  key: env.GOOGLE_API_KEY,
+});
 
 export const xfix = async (message: Message) => {
   const guildData = await prisma.server.findUnique({
@@ -34,12 +40,19 @@ export const xfix = async (message: Message) => {
     const postID = url.split("/").pop();
     const postDataRes = await fetch(`https://api.fxtwitter.com/2/status/${postID}`);
     const postData = await postDataRes.json();
-    const postLanguage = postData.status.lang;
+    const postText = postData.status.text;
 
     const preferredLocale = guildData.preferredLocale.toLowerCase();
 
-    if (postLanguage !== preferredLocale) {
-      url = `${url}/${preferredLocale}`;
+    if (postText) {
+      const [detection] = await translate.detect(postText);
+      const postLanguage = (
+        Array.isArray(detection) ? detection[0]?.language : detection?.language
+      )?.toLowerCase();
+
+      if (postLanguage && postLanguage !== preferredLocale) {
+        url = `${url}/${preferredLocale}`;
+      }
     }
 
     await message.reply({

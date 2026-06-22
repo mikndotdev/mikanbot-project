@@ -28,9 +28,7 @@ export const preferredLanguageExecute: SubcommandExecuteFunction<
     });
   }
 
-  if (
-    !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)
-  ) {
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
     return interaction.reply({
       content: "You need Administrator permission to use this command!",
       flags: "Ephemeral",

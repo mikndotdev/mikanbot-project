@@ -24,9 +24,9 @@ class CommandBuilder<TOptions extends readonly CommandOption[] = []> {
     };
   }
 
-  option<
-    const TNewOption extends Omit<CommandOption, "type"> & { type: CommandOptionType },
-  >(option: TNewOption): CommandBuilder<readonly [...TOptions, TNewOption]> {
+  option<const TNewOption extends Omit<CommandOption, "type"> & { type: CommandOptionType }>(
+    option: TNewOption,
+  ): CommandBuilder<readonly [...TOptions, TNewOption]> {
     const newOptions = [...(this.config.options || []), option] as readonly [
       ...TOptions,
       TNewOption,
