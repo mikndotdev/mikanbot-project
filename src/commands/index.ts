@@ -3,12 +3,14 @@ import { ping } from "@/commands/ping";
 import { currency } from "@/commands/currency";
 import { rank } from "@/commands/rank";
 import { config } from "@/commands/config";
+import { flight } from "@/commands/flight";
 
 export const commands = {
   ping,
   currency,
   rank,
   config,
+  flight,
 } as const satisfies Record<string, Command<any> | CommandWithSubcommands>;
 
 export type CommandName = keyof typeof commands;

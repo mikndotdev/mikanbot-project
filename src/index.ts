@@ -6,6 +6,7 @@ import { handleLevel } from "@/handlers/lvl";
 import { translateMessage } from "@/handlers/flagTranslation";
 import { xfix } from "@/handlers/xfix";
 import { instafix } from "@/handlers/instafix";
+import { handleFlightComponent } from "@/handlers/flightComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
 import {
@@ -87,6 +88,13 @@ client.on("interactionCreate", async (interaction) => {
   }
   if (interaction.isButton()) {
     console.log(`Received button: ${interaction.customId}`);
+    if (interaction.customId.startsWith("flight:")) {
+      try {
+        await handleFlightComponent(interaction);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 });
 
