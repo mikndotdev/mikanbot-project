@@ -3,6 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
+    AIRLABS_API_KEY: z.string(),
     API_PORT: z.string().default("3000"),
     API_SIGNING_KEY: z.string(),
     BOT_ID: z.string(),

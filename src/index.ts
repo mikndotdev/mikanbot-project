@@ -7,6 +7,7 @@ import { translateMessage } from "@/handlers/flagTranslation";
 import { xfix } from "@/handlers/xfix";
 import { instafix } from "@/handlers/instafix";
 import { handleFlightComponent } from "@/handlers/flightComponent";
+import { handlePlaneComponent } from "@/handlers/planeComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
 import {
@@ -91,6 +92,13 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("flight:")) {
       try {
         await handleFlightComponent(interaction);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (interaction.customId.startsWith("plane:")) {
+      try {
+        await handlePlaneComponent(interaction);
       } catch (e) {
         console.error(e);
       }
