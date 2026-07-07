@@ -1,6 +1,11 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
-import { joinVoiceChannel, entersState, VoiceConnectionStatus } from "@discordjs/voice";
+import {
+  joinVoiceChannel,
+  entersState,
+  VoiceConnectionStatus,
+  VoiceConnectionDisconnectReason,
+} from "@discordjs/voice";
 
 const joinOptions = [
   {
@@ -65,15 +70,27 @@ export const joinExecute: SubcommandExecuteFunction<typeof joinOptions> = async 
     selfDeaf: true,
   });
 
-  connection.on(VoiceConnectionStatus.Disconnected, async () => {
-    try {
-      await Promise.race([
-        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
-        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
-      ]);
-    } catch {
-      connection.destroy();
+  connection.on(VoiceConnectionStatus.Disconnected, async (_oldState, newState) => {
+    if (connection.state.status === VoiceConnectionStatus.Destroyed) return;
+
+    if (
+      newState.reason === VoiceConnectionDisconnectReason.WebSocketClose &&
+      newState.closeCode === 4014
+    ) {
+      try {
+        await entersState(connection, VoiceConnectionStatus.Connecting, 5_000);
+      } catch {
+        connection.destroy();
+      }
+      return;
     }
+
+    if (newState.reason === VoiceConnectionDisconnectReason.EndpointRemoved) {
+      connection.destroy();
+      return;
+    }
+
+    connection.rejoin();
   });
 
   try {
