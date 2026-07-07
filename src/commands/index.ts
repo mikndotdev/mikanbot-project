@@ -4,6 +4,7 @@ import { currency } from "@/commands/currency";
 import { rank } from "@/commands/rank";
 import { config } from "@/commands/config";
 import { aviation } from "@/commands/aviation";
+import { voice } from "@/commands/voice";
 
 export const commands = {
   ping,
@@ -11,6 +12,7 @@ export const commands = {
   rank,
   config,
   aviation,
+  voice,
 } as const satisfies Record<string, Command<any> | CommandWithSubcommands>;
 
 export type CommandName = keyof typeof commands;

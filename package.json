@@ -6,9 +6,10 @@
     "format": "oxfmt",
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bunx tsc && bun build --compile --outfile mikanbot src/index.ts"
+    "build": "bunx tsc && bun build --compile --external ffmpeg-static --external @discordjs/opus --external opusscript --external node-opus --external sodium-native --external sodium --external tweetnacl --external @stablelib/xchacha20poly1305 --external @noble/ciphers --outfile mikanbot src/index.ts"
   },
   "dependencies": {
+    "@discordjs/voice": "^0.19.2",
     "@elysiajs/swagger": "^1.3.1",
     "@google-cloud/translate": "^8.5.0",
     "@google-cloud/vision": "^4.3.2",
@@ -19,6 +20,7 @@
     "discord.js": "^14.26.4",
     "elysia": "^1.4.28",
     "iso-639-1": "^3.1.5",
+    "libsodium-wrappers": "^0.8.4",
     "papaparse": "^5.5.4",
     "redis": "^5.12.1",
     "staticmaps": "^1.13.1",
