@@ -1,10 +1,11 @@
-import type { Command, CommandWithSubcommands } from "@/types/command";
+import type { Command, CommandWithSubcommands, MessageCommand } from "@/types/command";
 import { ping } from "@/commands/ping";
 import { currency } from "@/commands/currency";
 import { rank } from "@/commands/rank";
 import { config } from "@/commands/config";
 import { aviation } from "@/commands/aviation";
 import { voice } from "@/commands/voice";
+import { timeInMyTimezone } from "@/commands/message/time-in-my-timezone";
 
 export const commands = {
   ping,
@@ -23,4 +24,18 @@ export function getCommand(name: string): Command<any> | CommandWithSubcommands 
 
 export function getAllCommands(): Array<Command<any> | CommandWithSubcommands> {
   return Object.values(commands);
+}
+
+export const messageCommands = {
+  "Time in my timezone": timeInMyTimezone,
+} as const satisfies Record<string, MessageCommand>;
+
+export type MessageCommandName = keyof typeof messageCommands;
+
+export function getMessageCommand(name: string): MessageCommand | undefined {
+  return messageCommands[name as MessageCommandName];
+}
+
+export function getAllMessageCommands(): MessageCommand[] {
+  return Object.values(messageCommands);
 }

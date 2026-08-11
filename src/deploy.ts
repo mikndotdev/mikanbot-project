@@ -1,6 +1,6 @@
 import { REST, Routes } from "discord.js";
 import { env } from "@/lib/env";
-import { getAllCommands } from "@/commands";
+import { getAllCommands, getAllMessageCommands } from "@/commands";
 
 const rest = new REST({ version: "10" }).setToken(env.BOT_TOKEN);
 
@@ -20,6 +20,14 @@ export function deployCommands() {
           const commandData = command.toJSON();
 
           commandDataArray.push(commandData);
+        }
+      }
+
+      for (const command of getAllMessageCommands()) {
+        if (command.enabled) {
+          console.log(`Preparing ${command.name} message command for registration`);
+
+          commandDataArray.push(command.toJSON());
         }
       }
 

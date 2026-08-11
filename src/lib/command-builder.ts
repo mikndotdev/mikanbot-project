@@ -1,4 +1,4 @@
-import type { ChatInputCommandInteraction } from "discord.js";
+import { ApplicationCommandType, type ChatInputCommandInteraction } from "discord.js";
 import type {
   BaseCommandConfig,
   Command,
@@ -8,6 +8,9 @@ import type {
   CommandOptionType,
   CommandWithSubcommands,
   InferOptionTypes,
+  MessageCommand,
+  MessageCommandConfig,
+  MessageCommandExecuteFunction,
   SubcommandConfig,
   SubcommandExecuteFunction,
   SubcommandOption,
@@ -204,4 +207,24 @@ export function createCommand<TOptions extends readonly CommandOption[] = []>(
 
 export function createCommandWithSubcommands(config: BaseCommandConfig): SubcommandBuilder {
   return new SubcommandBuilder(config);
+}
+
+export function createMessageCommand(
+  config: MessageCommandConfig,
+  execute: MessageCommandExecuteFunction,
+): MessageCommand {
+  return {
+    name: config.name,
+    cooldown: config.cooldown ?? 3,
+    premiumCooldown: config.premiumCooldown,
+    isPremium: config.isPremium ?? false,
+    botPermissions: config.botPermissions ?? [],
+    userPermissions: config.userPermissions ?? [],
+    enabled: config.enabled ?? true,
+    execute,
+    toJSON: () => ({
+      name: config.name,
+      type: ApplicationCommandType.Message,
+    }),
+  };
 }

@@ -9,6 +9,7 @@ export const env = createEnv({
     BOT_ID: z.string(),
     BOT_TOKEN: z.string(),
     DATABASE_URL: z.string(),
+    DEEPSEEK_API_KEY: z.string(),
     GOOGLE_API_KEY: z.string(),
     IMG_BACKEND: z.string(),
     LOGGING_WEBHOOK_URL: z.string(),

@@ -2,6 +2,7 @@ import { start } from "@/api/server";
 import { deployCommands } from "@/deploy";
 import { setPresence } from "@/presence";
 import { handleCommand } from "@/handlers/command";
+import { handleMessageCommand } from "@/handlers/messageCommand";
 import { handleLevel } from "@/handlers/lvl";
 import { translateMessage } from "@/handlers/flagTranslation";
 import { xfix } from "@/handlers/xfix";
@@ -88,6 +89,14 @@ client.on("interactionCreate", async (interaction) => {
       console.error(e);
     }
   }
+  if (interaction.isMessageContextMenuCommand()) {
+    console.log(`Received message command: ${interaction.commandName}`);
+    try {
+      await handleMessageCommand(interaction);
+    } catch (e) {
+      console.error(e);
+    }
+  }
   if (interaction.isButton()) {
     console.log(`Received button: ${interaction.customId}`);
     if (interaction.customId.startsWith("flight:")) {
@@ -129,3 +138,5 @@ client.on("guildCreate", async (guild) => {});
 
 client.login(env.BOT_TOKEN);
 start();
+
+globalThis.AI_SDK_LOG_WARNINGS = false;

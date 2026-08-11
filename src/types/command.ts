@@ -1,6 +1,8 @@
 import type {
   ApplicationCommandOptionType,
+  ApplicationCommandType,
   ChatInputCommandInteraction,
+  MessageContextMenuCommandInteraction,
   PermissionResolvable,
 } from "discord.js";
 
@@ -137,5 +139,34 @@ export interface CommandWithSubcommands {
     name: string;
     description: string;
     options: SubcommandOption[];
+  };
+}
+
+export interface MessageCommandConfig {
+  name: string;
+  cooldown?: number;
+  premiumCooldown?: number;
+  isPremium?: boolean;
+  botPermissions?: PermissionResolvable[];
+  userPermissions?: PermissionResolvable[];
+  enabled?: boolean;
+}
+
+export type MessageCommandExecuteFunction = (
+  interaction: MessageContextMenuCommandInteraction,
+) => Promise<unknown> | unknown;
+
+export interface MessageCommand {
+  name: string;
+  cooldown: number;
+  premiumCooldown?: number;
+  isPremium: boolean;
+  botPermissions: PermissionResolvable[];
+  userPermissions: PermissionResolvable[];
+  enabled: boolean;
+  execute: MessageCommandExecuteFunction;
+  toJSON: () => {
+    name: string;
+    type: ApplicationCommandType.Message;
   };
 }
