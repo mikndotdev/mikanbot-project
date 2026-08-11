@@ -65,7 +65,7 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}-arm
 
   build-merge:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
 
     needs:
       - build-amd64
