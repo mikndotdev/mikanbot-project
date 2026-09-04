@@ -53,21 +53,16 @@ export const xfix = async (message: Message) => {
       if (postLanguage && postLanguage !== preferredLocale) {
         url = `${url}/${preferredLocale}`;
       }
+
+      await message.reply({
+        content: `[Enhanced embed](${url})`,
+        allowedMentions: { repliedUser: false },
+      });
     } else {
       await message.reply({
         content: `[Enhanced embed](${url})`,
         allowedMentions: { repliedUser: false },
       });
     }
-
-    await message.reply({
-      content: `[Enhanced embed](${url})`,
-      allowedMentions: { repliedUser: false },
-    });
-  } else {
-    await message.reply({
-      content: `[Enhanced embed](${url})`,
-      allowedMentions: { repliedUser: false },
-    });
   }
 };
