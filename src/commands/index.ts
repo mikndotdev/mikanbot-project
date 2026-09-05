@@ -6,6 +6,7 @@ import { config } from "@/commands/config";
 import { aviation } from "@/commands/aviation";
 import { voice } from "@/commands/voice";
 import { timeInMyTimezone } from "@/commands/message/time-in-my-timezone";
+import { convertToGif } from "@/commands/message/convert-to-gif";
 
 export const commands = {
   ping,
@@ -28,6 +29,7 @@ export function getAllCommands(): Array<Command<any> | CommandWithSubcommands> {
 
 export const messageCommands = {
   "Time in my timezone": timeInMyTimezone,
+  "Convert to GIF": convertToGif,
 } as const satisfies Record<string, MessageCommand>;
 
 export type MessageCommandName = keyof typeof messageCommands;

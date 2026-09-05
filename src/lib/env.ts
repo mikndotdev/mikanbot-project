@@ -14,6 +14,10 @@ export const env = createEnv({
     IMG_BACKEND: z.string(),
     REDIS_URL: z.string(),
     SENTRY_DSN: z.string(),
+    STORAGE_ACCESS_KEY_ID: z.string(),
+    STORAGE_SECRET_ACCESS_KEY: z.string(),
+    STORAGE_BUCKET: z.string(),
+    STORAGE_PUBLIC_BASE_URL: z.string()
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
