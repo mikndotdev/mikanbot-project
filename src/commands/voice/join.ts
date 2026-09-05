@@ -6,6 +6,7 @@ import {
   VoiceConnectionStatus,
   VoiceConnectionDisconnectReason,
 } from "@discordjs/voice";
+import * as Sentry from "@sentry/bun";
 
 const joinOptions = [
   {
@@ -79,7 +80,11 @@ export const joinExecute: SubcommandExecuteFunction<typeof joinOptions> = async 
     ) {
       try {
         await entersState(connection, VoiceConnectionStatus.Connecting, 5_000);
-      } catch {
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { source: "voiceReconnect" },
+          extra: { guildId: interaction.guild.id, channelId: channel.id },
+        });
         connection.destroy();
       }
       return;
@@ -95,7 +100,11 @@ export const joinExecute: SubcommandExecuteFunction<typeof joinOptions> = async 
 
   try {
     await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { source: "voiceConnect" },
+      extra: { guildId: interaction.guild.id, channelId: channel.id },
+    });
     connection.destroy();
     return interaction.editReply("Failed to connect to the voice channel.");
   }

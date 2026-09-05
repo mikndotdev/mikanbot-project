@@ -11,6 +11,7 @@ import { handleFlightComponent } from "@/handlers/flightComponent";
 import { handlePlaneComponent } from "@/handlers/planeComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
+import * as Sentry from "@sentry/bun";
 import {
   Client,
   GatewayIntentBits,
@@ -19,6 +20,11 @@ import {
   MessageReaction,
   type User,
 } from "discord.js";
+
+Sentry.init({
+  dsn: env.SENTRY_DSN,
+  enableLogs: true,
+});
 
 const client = new Client({
   intents: [
@@ -47,12 +53,21 @@ export async function dmUser(id: string, provider: string, message: string) {
   try {
     await user.send({ embeds: [embed] });
   } catch (e) {
+    Sentry.captureException(e, { tags: { source: "dmUser" }, extra: { userId: id, provider } });
     return e;
   }
 }
 
+client.on("error", (error) => {
+  Sentry.captureException(error, { tags: { source: "discordClient" } });
+});
+
+client.on("shardError", (error, shardId) => {
+  Sentry.captureException(error, { tags: { source: "discordShard" }, extra: { shardId } });
+});
+
 client.on("clientReady", () => {
-  console.log(`Logged in as ${client.user?.tag}!`);
+  Sentry.logger.info(Sentry.logger.fmt`Logged in as ${client.user?.tag}!`);
   deployCommands();
   setPresence(client);
 });
@@ -64,53 +79,78 @@ client.on("messageReactionAdd", async (reaction, user) => {
     try {
       await reaction.fetch();
     } catch (error) {
-      console.error("Something went wrong when fetching the message: ", error);
+      Sentry.captureException(error, { tags: { source: "messageReactionAdd" } });
       return;
     }
   }
 
   if (!reaction.partial) {
+    let countryCode: string | undefined;
     try {
-      if (emojiCountryCode(reaction.emoji.name as string)) {
-        await translateMessage(reaction, user as User);
-      }
-    } catch (error) {
+      countryCode = emojiCountryCode(reaction.emoji.name as string);
+    } catch {
       return;
+    }
+    if (!countryCode) return;
+
+    try {
+      await translateMessage(reaction, user as User);
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "flagTranslation" },
+        extra: {
+          emoji: reaction.emoji.name,
+          userId: user.id,
+          guildId: reaction.message.guildId,
+        },
+      });
     }
   }
 });
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
-    console.log(`Received command: ${interaction.commandName}`);
+    Sentry.logger.info("Received command", {
+      commandName: interaction.commandName,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+    });
     try {
       await handleCommand(interaction);
     } catch (e) {
-      console.error(e);
+      Sentry.captureException(e);
     }
   }
   if (interaction.isMessageContextMenuCommand()) {
-    console.log(`Received message command: ${interaction.commandName}`);
+    Sentry.logger.info("Received message command", {
+      commandName: interaction.commandName,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+    });
     try {
       await handleMessageCommand(interaction);
     } catch (e) {
-      console.error(e);
+      Sentry.captureException(e);
     }
   }
   if (interaction.isButton()) {
-    console.log(`Received button: ${interaction.customId}`);
+    Sentry.logger.info("Received button", {
+      customId: interaction.customId,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+    });
     if (interaction.customId.startsWith("flight:")) {
       try {
         await handleFlightComponent(interaction);
       } catch (e) {
-        console.error(e);
+        Sentry.captureException(e);
       }
     }
     if (interaction.customId.startsWith("plane:")) {
       try {
         await handlePlaneComponent(interaction);
       } catch (e) {
-        console.error(e);
+        Sentry.captureException(e);
       }
     }
   }
@@ -118,25 +158,42 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  console.log("Received message!");
-  handleLevel(message);
+  Sentry.logger.debug("Received message", {
+    userId: message.author.id,
+    guildId: message.guildId,
+  });
+  const messageExtra = {
+    messageId: message.id,
+    userId: message.author.id,
+    guildId: message.guildId,
+  };
+
+  handleLevel(message).catch((error) => {
+    Sentry.captureException(error, { tags: { source: "handleLevel" }, extra: messageExtra });
+  });
   if (
     message.content.startsWith("https://x.com/") ||
     message.content.startsWith("https://twitter.com/")
   ) {
-    xfix(message);
+    xfix(message).catch((error) => {
+      Sentry.captureException(error, { tags: { source: "xfix" }, extra: messageExtra });
+    });
   }
   if (
     message.content.startsWith("https://instagram.com/") ||
     message.content.startsWith("https://www.instagram.com/")
   ) {
-    instafix(message);
+    instafix(message).catch((error) => {
+      Sentry.captureException(error, { tags: { source: "instafix" }, extra: messageExtra });
+    });
   }
 });
 
 client.on("guildCreate", async (guild) => {});
 
-client.login(env.BOT_TOKEN);
+client.login(env.BOT_TOKEN).catch((error) => {
+  Sentry.captureException(error, { tags: { source: "login" } });
+});
 start();
 
 globalThis.AI_SDK_LOG_WARNINGS = false;

@@ -1,25 +1,8 @@
-import { WebhookClient, EmbedBuilder, type ChatInputCommandInteraction } from "discord.js";
-import crypto from "node:crypto";
+import { EmbedBuilder, type ChatInputCommandInteraction } from "discord.js";
+import * as Sentry from "@sentry/bun";
 import { setCommandRatelimit, checkCommandRatelimit } from "@/handlers/ratelimit";
 import { prisma } from "@/lib/db";
-import { env } from "@/lib/env";
 import { getCommand } from "@/commands";
-
-const logginWebhook = new WebhookClient({
-  url: env.LOGGING_WEBHOOK_URL,
-});
-
-const sendLog = async (message: string) => {
-  const logId = crypto.randomBytes(4).toString("hex");
-  const embed = new EmbedBuilder()
-    .setTitle(`Error Log`)
-    .setDescription(`\`\`\`ts\n${message}\n\`\`\``)
-    .setColor("#FF0000")
-    .setTimestamp();
-
-  await logginWebhook.send({ content: `EID ${logId}`, embeds: [embed] }).catch(console.error);
-  return logId;
-};
 
 export async function handleCommand(interaction: ChatInputCommandInteraction) {
   try {
@@ -71,9 +54,10 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
       setCommandRatelimit("cmd", interaction, command.cooldown, command.name);
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const logId = await sendLog(errorMessage);
-    console.error(`Error while executing command: ${logId}`);
+    const logId = Sentry.captureException(error, {
+      tags: { source: "command", command: interaction.commandName },
+      extra: { userId: interaction.user.id, guildId: interaction.guildId },
+    });
     const errorEmbed = new EmbedBuilder()
       .setTitle("An error occurred while executing this command!")
       .setDescription(

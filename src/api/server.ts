@@ -3,9 +3,10 @@ import { swagger } from "@elysiajs/swagger";
 import { AcclinkEndpoint } from "@/api/routes/account-link";
 import { dmEndpoint } from "@/api/routes/dm";
 import { env } from "@/lib/env";
+import * as Sentry from "@sentry/bun";
 
 export const app = new Elysia({ aot: false }).onError(({ code, error }) => {
-  console.log(code);
+  Sentry.captureException(error, { tags: { source: "api", code } });
   return new Response(JSON.stringify({ error: error.toString() ?? code }), {
     status: 500,
   });
@@ -29,6 +30,6 @@ app.use(dmEndpoint);
 
 export function start() {
   app.listen(env.API_PORT, () => {
-    console.log(`Server started on port ${env.API_PORT}`);
+    Sentry.logger.info(Sentry.logger.fmt`Server started on port ${env.API_PORT}`);
   });
 }

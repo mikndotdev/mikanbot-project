@@ -7,6 +7,7 @@ import { dmUser } from "@/index";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import countries from "@/countries.json";
+import * as Sentry from "@sentry/bun";
 
 function countryToLanguage(country: string): string | undefined {
   const languageList = (countries as Record<string, string>)[country];
@@ -33,7 +34,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
   const country = emojiCountryCode(reaction.emoji.name as string);
   const language = countryToLanguage(country);
   if (!language) {
-    console.error("Unsupported country code:", country);
+    Sentry.logger.warn("Unsupported country code", { country, emoji: reaction.emoji.name });
     return;
   }
   const message = await reaction.message.fetch();
@@ -48,7 +49,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
     return;
   }
   if (!message.content && message.attachments.size === 0) {
-    console.error("Message content is empty or undefined.");
+    Sentry.logger.debug("Message content is empty or undefined", { messageId: message.id });
     return;
   }
   message.react("<a:loading:1272805571585642506>");
@@ -76,6 +77,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
         return message.react("❌");
       }
       const translationResult = await translate.translate(text, language).catch((error) => {
+        Sentry.captureException(error, {
+          tags: { source: "translate", input: "image" },
+          extra: { language, messageId: message.id, guildId: message.guildId },
+        });
         message.reactions.removeAll();
         message.react("❌");
         return null;
@@ -105,6 +110,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
     }
   }
   const translationResult = await translate.translate(message.content, language).catch((error) => {
+    Sentry.captureException(error, {
+      tags: { source: "translate", input: "text" },
+      extra: { language, messageId: message.id, guildId: message.guildId },
+    });
     message.reactions.removeAll();
     message.react("❌");
     return null;

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/bun";
 import { randomUUID } from "node:crypto";
 import { unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -81,11 +82,18 @@ export async function fetchAircraft(callsign: string): Promise<Aircraft | null> 
     const res = await fetch(
       `https://api.airplanes.live/v2/callsign/${encodeURIComponent(callsign)}`,
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      Sentry.logger.warn("airplanes.live lookup failed", { callsign, status: res.status });
+      return null;
+    }
     const data = (await res.json()) as { ac?: Aircraft[] };
     if (!data.ac || data.ac.length === 0) return null;
     return data.ac[0] ?? null;
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { source: "airplanesLive" },
+      extra: { callsign },
+    });
     return null;
   }
 }
@@ -119,13 +127,20 @@ async function fetchPlanespotters(kind: "hex" | "reg", value: string): Promise<P
       headers: { "User-Agent": PLANESPOTTERS_UA, Accept: "application/json" },
     });
     if (!res.ok) {
-      console.error(`planespotters ${kind}/${value} → HTTP ${res.status}`);
+      Sentry.logger.warn("planespotters photo lookup failed", {
+        kind,
+        value,
+        status: res.status,
+      });
       return [];
     }
     const data = (await res.json()) as { photos?: Photo[] };
     return data.photos ?? [];
   } catch (error) {
-    console.error("planespotters fetch failed:", error);
+    Sentry.captureException(error, {
+      tags: { source: "planespotters" },
+      extra: { kind, value },
+    });
     return [];
   }
 }
@@ -229,9 +244,13 @@ function getPinBuffer(): Promise<Buffer | null> {
     pinBufferPromise = (async () => {
       try {
         const res = await fetch(PIN_URL);
-        if (!res.ok) return null;
+        if (!res.ok) {
+          Sentry.logger.warn("flight map pin fetch failed", { status: res.status });
+          return null;
+        }
         return Buffer.from(await res.arrayBuffer());
-      } catch {
+      } catch (error) {
+        Sentry.captureException(error, { tags: { source: "flightMapPin" } });
         return null;
       }
     })();
@@ -278,11 +297,13 @@ export async function renderMap(
     await map.render([lon, lat], clampZoom(zoom));
     return await map.image.buffer("image/png");
   } catch (error) {
-    console.error("Flight map render failed:", error);
+    Sentry.captureException(error, { tags: { source: "flightMap" } });
     return null;
   } finally {
     if (markerPath) {
-      await unlink(markerPath).catch(() => {});
+      await unlink(markerPath).catch((error) => {
+        Sentry.captureException(error, { tags: { source: "flightMapCleanup" } });
+      });
     }
   }
 }

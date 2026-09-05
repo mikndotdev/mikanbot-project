@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import * as Sentry from "@sentry/bun";
 
 const API = "https://airlabs.co/api/v9";
 const LOGO_BASE = "https://qkyxmtrnsndaujcyxzfg.supabase.co/functions/v1/airline-logo";
@@ -91,11 +92,22 @@ async function airlabsGet<T>(path: string, params: Record<string, string>): Prom
   try {
     const query = new URLSearchParams({ ...params, api_key: env.AIRLABS_API_KEY });
     const res = await fetch(`${API}/${path}?${query.toString()}`);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      Sentry.logger.warn("airlabs request failed", { path, status: res.status });
+      return null;
+    }
     const data = (await res.json()) as { response?: T; error?: unknown };
-    if (data.error || data.response === undefined) return null;
+    if (data.error) {
+      Sentry.logger.warn("airlabs returned an error", {
+        path,
+        error: JSON.stringify(data.error),
+      });
+      return null;
+    }
+    if (data.response === undefined) return null;
     return data.response;
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, { tags: { source: "airlabs" }, extra: { path } });
     return null;
   }
 }
@@ -133,7 +145,11 @@ export async function fetchAirlineLogo(icao: string | null | undefined): Promise
     if (res.ok && type.startsWith("image/") && !type.includes("svg")) {
       result = Buffer.from(await res.arrayBuffer());
     }
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { source: "airlabsLogo" },
+      extra: { icao: key },
+    });
     result = null;
   }
 

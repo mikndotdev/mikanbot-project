@@ -1,9 +1,14 @@
 import { createClient } from "redis";
 import { type CommandInteraction, type Message } from "discord.js";
 import { env } from "@/lib/env";
+import * as Sentry from "@sentry/bun";
 
 const redis = createClient({
   url: env.REDIS_URL,
+});
+
+redis.on("error", (error) => {
+  Sentry.captureException(error, { tags: { source: "redis" } });
 });
 
 await redis.connect();

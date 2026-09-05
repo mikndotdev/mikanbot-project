@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { setMessageRatelimit, checkMessageRatelimit } from "@/handlers/ratelimit";
 import type { Message } from "discord.js";
 import { initGuild } from "@/handlers/initGuild";
+import * as Sentry from "@sentry/bun";
 
 function getLevelFromXP(xp: number): number {
   let level = 1;
@@ -36,7 +37,8 @@ export async function handleLevel(message: Message) {
   }
 
   if (!guildDB?.levelsEnabled) {
-    return console.log("Levels are disabled in this server");
+    Sentry.logger.debug("Levels are disabled in this server", { guildId: message.guildId });
+    return;
   }
 
   if (!lvlDB) {
