@@ -187,3 +187,13 @@ export function stripRouteTag(value: string | null | undefined): string {
   if (!value) return "";
   return value.replace(/#[^#\s]*$/, "").trim() || value;
 }
+
+const CONVENTIONAL_SHUBETSU = /^(普通|快速|各駅停車|区間快速|通勤快速|新快速|特別快速|回送)/;
+
+export function isShinkansen(rosenCode: string, shubetsu: string | null | undefined): boolean {
+  const system = lineSystems.get(rosenCode);
+  if (!system || !system.regions.includes("新幹線")) return false;
+  if (system.regions.length === 1) return true;
+  const base = stripRouteTag(shubetsu).replace(/^臨時/, "");
+  return !CONVENTIONAL_SHUBETSU.test(base);
+}

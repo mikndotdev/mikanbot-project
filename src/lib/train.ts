@@ -29,6 +29,7 @@ import { getOperationalDay, parseClockToMinutes } from "@/lib/jst";
 import { lineEmoji } from "@/lib/train-logos";
 import {
   iconUrlFromPath,
+  isShinkansen,
   lineLabel,
   lookupIconByFormation,
   PLACEHOLDER_ICON,
@@ -218,7 +219,14 @@ export function deriveProgress(stops: NormalizedStop[], nowMinutes: number): Tra
 
 const WINDOW_SIZE = 4;
 
-export function buildStationWindow(stops: NormalizedStop[], progress: TrainProgress): string {
+export const SHINKANSEN_MARKER = "<:shinkansen_icon:1548009167980204062>";
+export const TRAIN_MARKER = "🚃";
+
+export function buildStationWindow(
+  stops: NormalizedStop[],
+  progress: TrainProgress,
+  marker: string = TRAIN_MARKER,
+): string {
   if (stops.length === 0) return "";
 
   const size = Math.min(WINDOW_SIZE, stops.length);
@@ -230,9 +238,9 @@ export function buildStationWindow(stops: NormalizedStop[], progress: TrainProgr
   win.forEach((stop, index) => {
     const global = start + index;
     const isCurrent = global === progress.currentIndex;
-    parts.push(isCurrent && atStation ? `🚋${stop.station}` : stop.station);
+    parts.push(isCurrent && atStation ? `${marker}${stop.station}` : stop.station);
     if (index < win.length - 1) {
-      parts.push(isCurrent && !atStation ? " 🚋 " : " ━━ ");
+      parts.push(isCurrent && !atStation ? ` ${marker} ` : " ━━ ");
     }
   });
 
@@ -425,7 +433,8 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   );
 
   const expanded = state.expanded;
-  const window = runningToday ? buildStationWindow(stops, progress) : "";
+  const marker = isShinkansen(state.rosenCode, detail.shubetsu) ? SHINKANSEN_MARKER : TRAIN_MARKER;
+  const window = runningToday ? buildStationWindow(stops, progress, marker) : "";
   const statusLine = `**現在地**　${runningToday ? progress.text : "－"}　${statusBadge}`;
 
   if (expanded) {
