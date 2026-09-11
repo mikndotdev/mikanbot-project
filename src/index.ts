@@ -1,6 +1,7 @@
 import { start } from "@/api/server";
 import { deployCommands } from "@/deploy";
 import { setPresence } from "@/presence";
+import { startTrainAlerts } from "@/lib/train-alerts";
 import { handleAutocomplete } from "@/handlers/autocomplete";
 import { handleCommand } from "@/handlers/command";
 import { handleMessageCommand } from "@/handlers/messageCommand";
@@ -43,7 +44,10 @@ const client = new Client({
 });
 
 export async function dmUser(id: string, provider: string, message: string) {
-  const user = client.users.cache.get(id);
+  const user = await client.users.fetch(id).catch((error) => {
+    Sentry.captureException(error, { tags: { source: "dmUser" }, extra: { userId: id, provider } });
+    return null;
+  });
   if (!user) return;
 
   const embed = new EmbedBuilder()

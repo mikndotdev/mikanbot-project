@@ -47,6 +47,105 @@ export interface ElesiteDayPattern {
   name: string;
 }
 
+export interface ElesiteStationTimetableEntry {
+  retsuban: string;
+  retsuban_id: number;
+  shubetsu: string;
+  ikisaki: string;
+  train_time: string;
+  train_type?: string;
+  bansen?: string;
+  icon_path_list?: string[];
+  sharyo?: string;
+  [key: string]: unknown;
+}
+
+export interface ElesiteStationTimetable {
+  nobori_timetable?: ElesiteStationTimetableEntry[];
+  kudari_timetable?: ElesiteStationTimetableEntry[];
+  direction_info?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface ElesiteUnyouLeg {
+  retsuban_id: number;
+  retsuban?: string | null;
+  shubetsu?: string | null;
+  start_st?: string | null;
+  ikisaki?: string | null;
+  end_st?: string | null;
+  start_time?: number | null;
+  end_time?: number | null;
+  [key: string]: unknown;
+}
+
+export interface ElesiteCrossEntry {
+  info?: Array<{
+    retsuban?: string;
+    shubetsu?: string;
+    ikisaki?: string;
+    is_same_direction?: boolean;
+    train?: { sharyo?: string; iconPaths?: string[] };
+    [key: string]: unknown;
+  }>;
+  cross_points?: {
+    cross_time1?: string;
+    cross_time2?: string;
+    station_1?: string;
+    station_2?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface ElesiteCarEntry {
+  shaban?: string;
+  motor_type?: string;
+  left_panta_type?: string;
+  right_panta_type?: string;
+  controller?: string;
+  bikou?: string;
+  [key: string]: unknown;
+}
+
+export interface ElesiteHenseiTable {
+  hensei_table?: Array<{ sharyo?: string; shaban_list?: ElesiteCarEntry[] }>;
+  formation?: string;
+  [key: string]: unknown;
+}
+
+export interface ElesiteMapTrack {
+  track_id?: number;
+  name?: string;
+  direction?: ElesiteDirection;
+  points?: Array<[number, number]>;
+}
+
+export interface ElesiteMapGeometry {
+  routes?: Record<string, { tracks?: ElesiteMapTrack[] }>;
+  [key: string]: unknown;
+}
+
+export interface ElesiteMapTrain {
+  retsuban?: string;
+  shubetsu?: string;
+  ikisaki?: string;
+  direction?: ElesiteDirection;
+  color?: string;
+  lat?: number;
+  lng?: number;
+  at_station?: boolean;
+  [key: string]: unknown;
+}
+
+export interface ElesiteHenseiName {
+  formation?: string;
+  sharyo?: string;
+  is_formation?: boolean;
+  icon_path?: string;
+  [key: string]: unknown;
+}
+
 export interface ElesiteTrain {
   retsuban_id: number;
   retsuban: string;
@@ -122,12 +221,33 @@ export interface ElesitePositions {
 }
 
 export interface ElesiteRailwayInfoEntry {
+  index: number;
+  status: number;
+  info?: string;
+  reason?: string;
+  detail?: string | null;
+  direction?: string;
+  color?: string;
+  user_name?: string;
+  toukou_time?: string;
+  incident_time?: string | null;
   [key: string]: unknown;
 }
 
 export interface ElesiteRailwayInfo {
   railway_info_list?: ElesiteRailwayInfoEntry[];
   [key: string]: unknown;
+}
+
+export const RAILWAY_STATUS_NORMAL = 0;
+
+export function sortRailwayInfo(info: ElesiteRailwayInfo | null): ElesiteRailwayInfoEntry[] {
+  const list = info?.railway_info_list ?? [];
+  return [...list].sort((a, b) => Number(b.index ?? 0) - Number(a.index ?? 0));
+}
+
+export function latestRailwayInfo(info: ElesiteRailwayInfo | null): ElesiteRailwayInfoEntry | null {
+  return sortRailwayInfo(info)[0] ?? null;
 }
 
 export interface ElesiteSlimTrain {
@@ -138,6 +258,7 @@ export interface ElesiteSlimTrain {
   direction: ElesiteDirection;
   start: number;
   end: number;
+  sharyo: string;
 }
 
 export interface ElesiteSlimDiagram {
@@ -166,6 +287,7 @@ function slimDiagram(
       direction: train.direction,
       start: Number(train.start_time ?? 0),
       end: Number(train.end_time ?? 0),
+      sharyo: String(train.sharyo ?? ""),
     })),
   };
 }
@@ -187,7 +309,7 @@ export async function getDayPattern(
 }
 
 export function slimDiagramKey(rosenCode: string, dayId: number, selectDate: string): string {
-  return `elesite:v1:diagram:slim:${rosenCode}:${dayId}:${selectDate}`;
+  return `elesite:v2:diagram:slim:${rosenCode}:${dayId}:${selectDate}`;
 }
 
 export async function getSlimDiagram(
@@ -260,6 +382,181 @@ export async function getRailwayInfo(
       rosen_code: rosenCode,
       select_date: selectDate,
     }),
+  );
+}
+
+export async function getStationTimetable(
+  rosenCode: string,
+  station: string,
+  hour: number,
+  dayId: number,
+  selectDate: string,
+): Promise<ElesiteStationTimetable | null> {
+  return cached(
+    `elesite:v1:sttt:${rosenCode}:${dayId}:${selectDate}:${station}:${hour}`,
+    dayScoped(TTL_RETSUBAN),
+    () =>
+      elesiteGet<ElesiteStationTimetable>("get_st_timetable", {
+        rosen_code: rosenCode,
+        station,
+        select_hour: hour,
+        day_id: dayId,
+        select_date: selectDate,
+      }),
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+export async function getDailyUnyou(
+  retsubanId: number,
+  selectDate: string,
+): Promise<ElesiteUnyouLeg[] | null> {
+  return cached(
+    `elesite:v1:unyou:${retsubanId}:${selectDate}`,
+    dayScoped(TTL_RETSUBAN),
+    async () => {
+      const body = await elesiteGet<Array<{ unyou_list?: ElesiteUnyouLeg[] }>>(
+        "get_daily_unyou_by_retsuban_id",
+        { retsuban_id: retsubanId, select_date: selectDate },
+      );
+      if (body === undefined) return undefined;
+      if (!Array.isArray(body)) return null;
+      return body.flatMap((group) => group.unyou_list ?? []);
+    },
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+export async function getTrainCross(
+  rosenCode: string,
+  retsubanId: number,
+  dayId: number,
+  selectDate: string,
+): Promise<ElesiteCrossEntry[] | null> {
+  return cached(
+    `elesite:v1:cross:${rosenCode}:${retsubanId}:${dayId}:${selectDate}`,
+    dayScoped(TTL_RETSUBAN),
+    async () => {
+      const body = await elesiteGet<{ code?: number; data?: ElesiteCrossEntry[] }>(
+        "get_train_cross",
+        {
+          rosen_code: rosenCode,
+          retsuban_id: retsubanId,
+          day_id: dayId,
+          select_date: selectDate,
+        },
+      );
+      if (body === undefined) return undefined;
+      return body?.data ?? null;
+    },
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+export async function getHenseiTable(
+  rosenCode: string,
+  formation: string,
+): Promise<ElesiteHenseiTable | null> {
+  return cached(
+    `elesite:v1:hensei:${rosenCode}:${formation}`,
+    TTL_DIA_PATTERN,
+    () =>
+      elesiteGet<ElesiteHenseiTable>("get_hensei_table", {
+        rosen_code: rosenCode,
+        formation,
+        active_only: false,
+      }),
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+export async function getFormationList(rosenCode: string): Promise<string[] | null> {
+  return cached(
+    `elesite:v1:formations:${rosenCode}`,
+    TTL_DIA_PATTERN,
+    async () => {
+      const body = await elesiteGet<{ formation_list?: string[] }>("get_formation_list", {
+        rosen_code: rosenCode,
+      });
+      if (body === undefined) return undefined;
+      return body?.formation_list ?? null;
+    },
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+export async function getHenseiNameList(
+  rosenCode: string,
+  selectDate: string,
+): Promise<ElesiteHenseiName[] | null> {
+  return cached(
+    `elesite:v1:henseinames:${rosenCode}:${selectDate}`,
+    dayScoped(TTL_DIA_PATTERN),
+    async () => {
+      const body = await elesiteGet<{ hensei_list?: ElesiteHenseiName[] }>("get_hensei_name_list", {
+        rosen_code: rosenCode,
+        select_date: selectDate,
+      });
+      if (body === undefined) return undefined;
+      return body?.hensei_list ?? null;
+    },
+    { negativeTtlSeconds: 60 },
+  );
+}
+
+const MAX_TRACK_POINTS = 400;
+
+function downsample(points: Array<[number, number]>): Array<[number, number]> {
+  if (points.length <= MAX_TRACK_POINTS) return points;
+  const step = Math.ceil(points.length / MAX_TRACK_POINTS);
+  const out = points.filter((_, i) => i % step === 0);
+  const last = points[points.length - 1];
+  if (last && out[out.length - 1] !== last) out.push(last);
+  return out;
+}
+
+export async function getMapGeometry(
+  rosenCode: string,
+  selectDate: string,
+): Promise<ElesiteMapTrack[] | null> {
+  return cached(
+    `elesite:v1:geom:${rosenCode}`,
+    TTL_DIA_PATTERN,
+    async () => {
+      const body = await elesiteGet<ElesiteMapGeometry>("get_map_geometry", {
+        rosen_code: rosenCode,
+        select_date: selectDate,
+      });
+      if (body === undefined) return undefined;
+      const tracks = Object.values(body?.routes ?? {}).flatMap((route) => route.tracks ?? []);
+      const usable = tracks
+        .filter((track) => Array.isArray(track.points) && track.points.length > 1)
+        .map((track) => ({ ...track, points: downsample(track.points ?? []) }));
+      return usable.length > 0 ? usable : null;
+    },
+    { negativeTtlSeconds: 300 },
+  );
+}
+
+export async function getMapTrainPositions(
+  rosenCode: string,
+  dayId: number,
+  now: Date = new Date(),
+): Promise<ElesiteMapTrain[] | null> {
+  const day = getOperationalDay(now);
+  return cached(
+    `elesite:v1:posmap:${rosenCode}:${dayId}:${day.selectDate}:${day.currentTime}`,
+    TTL_POSITION,
+    async () => {
+      const body = await elesiteGet<{ trains?: ElesiteMapTrain[] }>("get_train_position_map", {
+        rosen_code: rosenCode,
+        minute: day.currentTime,
+        day_id: dayId,
+        select_date: day.selectDate,
+      });
+      if (body === undefined) return undefined;
+      return body?.trains ?? null;
+    },
   );
 }
 

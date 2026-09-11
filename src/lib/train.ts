@@ -13,19 +13,25 @@ import {
   ThumbnailBuilder,
 } from "discord.js";
 import {
+  getDailyUnyou,
   getRailwayInfo,
   getRetsubanTimeById,
   getTrainPositions,
+  latestRailwayInfo,
+  RAILWAY_STATUS_NORMAL,
   resolveOperationalContext,
+  sortRailwayInfo,
 } from "@/lib/elesite";
 import type {
   ElesitePositions,
+  ElesiteUnyouLeg,
   ElesiteRailwayInfo,
+  ElesiteRailwayInfoEntry,
   ElesiteRetsubanTime,
   ElesiteTimetableEntry,
   ElesiteTimetableGroup,
 } from "@/lib/elesite";
-import { getOperationalDay, parseClockToMinutes } from "@/lib/jst";
+import { formatHhmm, getOperationalDay, parseClockToMinutes } from "@/lib/jst";
 import { lineEmoji } from "@/lib/train-logos";
 import {
   iconUrlFromPath,
@@ -322,11 +328,74 @@ export function resolveTrainIconUrl(
   return fallback ?? PLACEHOLDER_ICON;
 }
 
+export function statusEmoji(status: number): string {
+  if (status >= 3) return "🔴";
+  if (status === 2) return "🟠";
+  if (status === 1) return "🟡";
+  return "🔵";
+}
+
+export function formatRailwayEntry(entry: ElesiteRailwayInfoEntry): string {
+  const head = [
+    `${statusEmoji(entry.status)} **${entry.info ?? "運行情報"}**`,
+    entry.reason ? `・${entry.reason}` : "",
+    entry.direction ? `・${entry.direction}` : "",
+    entry.toukou_time ? `　-# ${entry.toukou_time}` : "",
+  ].join("");
+  const detail = (entry.detail ?? "").trim();
+  return detail ? `${head}\n${detail.split("\n").join("\n")}` : head;
+}
+
+export function buildDisruptionBlock(railwayInfo: ElesiteRailwayInfo | null): string | null {
+  const latest = latestRailwayInfo(railwayInfo);
+  if (!latest || latest.status <= RAILWAY_STATUS_NORMAL) return null;
+  const others = sortRailwayInfo(railwayInfo).filter(
+    (e) => e.index !== latest.index && e.status > RAILWAY_STATUS_NORMAL,
+  );
+  const tail = others.length > 0 ? `\n-# 他 ${others.length} 件の運行情報` : "";
+  return `${formatRailwayEntry(latest)}${tail}\n-# 利用者投稿による情報です`;
+}
+
+const MAX_UNYOU_LEGS = 7;
+
+export function buildUnyouBlock(legs: ElesiteUnyouLeg[] | null, currentId: number): string | null {
+  const runs = (legs ?? []).filter((leg) => Number(leg.retsuban_id) > 0);
+  if (runs.length <= 1) return null;
+
+  const index = runs.findIndex((leg) => Number(leg.retsuban_id) === currentId);
+  const start = Math.max(0, Math.min(index - 2, runs.length - MAX_UNYOU_LEGS));
+  const window = runs.slice(start, start + MAX_UNYOU_LEGS);
+
+  const rows = window.map((leg) => {
+    const isCurrent = Number(leg.retsuban_id) === currentId;
+    const marker = isCurrent ? "▶" : "　";
+    const times =
+      typeof leg.start_time === "number" && leg.start_time >= 0
+        ? `\`${formatHhmm(leg.start_time)}\``
+        : "`--:--`";
+    const from = leg.start_st && leg.start_st !== "データ無し" ? leg.start_st : "";
+    const to = leg.ikisaki && leg.ikisaki !== "データ無し" ? leg.ikisaki : "";
+    const route = from || to ? `${from}→${to}` : "";
+    const name = `${stripRouteTag(leg.shubetsu ?? "")} ${stripRouteTag(leg.retsuban ?? "")}`.trim();
+    const line = `${marker} ${times} ${name}　-# ${route}`;
+    return isCurrent ? `**${line}**` : line;
+  });
+
+  const hidden = runs.length - window.length;
+  const more = hidden > 0 ? `\n-# 他 ${hidden} 運用` : "";
+  return `**本日の運用** (${runs.length}本)\n${rows.join("\n")}${more}`;
+}
+
 function parseAccent(color: string | undefined): number {
   if (!color) return ACCENT;
   const hex = color.replace("#", "").trim();
   if (!/^[0-9a-fA-F]{6}$/.test(hex)) return ACCENT;
   return Number.parseInt(hex, 16);
+}
+
+export function lineEmojiPrefix(rosenCode: string): string {
+  const logo = lineEmoji(rosenCode);
+  return logo ? `${logo} ` : "";
 }
 
 function noticeContainer(text: string): ContainerBuilder {
@@ -381,6 +450,7 @@ export interface TrainOwner {
 export interface BuildTrainArgs {
   state: TrainState;
   owner?: TrainOwner;
+  unyou?: ElesiteUnyouLeg[] | null;
   detail: ElesiteRetsubanTime;
   positions: ElesitePositions | null;
   railwayInfo: ElesiteRailwayInfo | null;
@@ -389,7 +459,7 @@ export interface BuildTrainArgs {
 }
 
 export function buildTrainMessage(args: BuildTrainArgs) {
-  const { state, detail, positions, railwayInfo, icon, owner } = args;
+  const { state, detail, positions, railwayInfo, icon, owner, unyou } = args;
   const now = args.now ?? new Date();
   const day = getOperationalDay(now);
 
@@ -433,6 +503,8 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   );
 
   const expanded = state.expanded;
+  const disruption = buildDisruptionBlock(railwayInfo);
+  const severe = (latestRailwayInfo(railwayInfo)?.status ?? 0) >= 2;
   const marker = isShinkansen(state.rosenCode, detail.shubetsu) ? SHINKANSEN_MARKER : TRAIN_MARKER;
   const window = runningToday ? buildStationWindow(stops, progress, marker) : "";
   const statusLine = `**現在地**　${runningToday ? progress.text : "－"}　${statusBadge}`;
@@ -449,16 +521,11 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       ),
     );
 
-    const disruptions = railwayInfo?.railway_info_list ?? [];
-    if (disruptions.length > 0) {
+    if (disruption) {
       container.addSeparatorComponents(
         new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small),
       );
-      container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-          `⚠️ **運行情報**　この路線に ${disruptions.length} 件の運行情報があります。`,
-        ),
-      );
+      container.addTextDisplayComponents(new TextDisplayBuilder().setContent(disruption));
     }
 
     container.addSeparatorComponents(
@@ -475,9 +542,19 @@ export function buildTrainMessage(args: BuildTrainArgs) {
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent([stopsHeading, stopLines.join("\n") || "－"].join("\n")),
     );
+
+    const unyouBlock = buildUnyouBlock(unyou ?? null, state.retsubanId);
+    if (unyouBlock) {
+      container.addSeparatorComponents(
+        new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small),
+      );
+      container.addTextDisplayComponents(new TextDisplayBuilder().setContent(unyouBlock));
+    }
   } else {
     container.addTextDisplayComponents(
-      new TextDisplayBuilder().setContent([statusLine, window].filter(Boolean).join("\n")),
+      new TextDisplayBuilder().setContent(
+        [statusLine, window, severe && disruption ? disruption : ""].filter(Boolean).join("\n"),
+      ),
     );
   }
 
@@ -572,10 +649,11 @@ export async function renderTrainView(
     return buildNoticeMessage("## 🚆 列車情報\n路線のダイヤ情報を取得できませんでした。");
   }
 
-  const [detail, positions, railwayInfo] = await Promise.all([
+  const [detail, positions, railwayInfo, unyou] = await Promise.all([
     getRetsubanTimeById(state.retsubanId, context.selectDate),
     getTrainPositions(state.rosenCode, context.dayId, now),
     getRailwayInfo(state.rosenCode, context.selectDate),
+    state.expanded ? getDailyUnyou(state.retsubanId, context.selectDate) : Promise.resolve(null),
   ]);
 
   if (!detail || !detail.retsuban) {
@@ -588,5 +666,5 @@ export async function renderTrainView(
     resolveTrainIconUrl(state.rosenCode, detail, positions, state.retsubanId),
   );
 
-  return buildTrainMessage({ state, owner, detail, positions, railwayInfo, icon, now });
+  return buildTrainMessage({ state, owner, detail, positions, railwayInfo, icon, unyou, now });
 }
