@@ -24,7 +24,7 @@ export const findExecute: SubcommandExecuteFunction<typeof trainOptions> = async
   await interaction.reply(buildLoadingMessage(lineLabel(selection.rosenCode)));
 
   try {
-    const message = await renderTrainView({ ...selection, page: 0, expanded: false });
+    const message = await renderTrainView({ ...selection, page: 0, expanded: false, map: "off" });
     await interaction.editReply(message);
   } catch {
     await interaction.editReply(

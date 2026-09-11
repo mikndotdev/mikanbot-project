@@ -11,16 +11,33 @@ const HEIGHT = 600;
 const TRACK_COLOR = "#1E88E5CC";
 const TRACK_WIDTH = 4;
 const DOT_SIZE = 18;
+const TARGET_SIZE = 34;
 const MAX_TRAINS = 60;
+const TRAIN_ZOOM = 12;
+
+export type MapFraming = "train" | "line";
+
+export interface MapTarget {
+  lat: number;
+  lng: number;
+  color?: string;
+}
 
 function dotSvg(color: string): string {
   const fill = /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#FF7700";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${DOT_SIZE}" height="${DOT_SIZE}" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="${fill}" stroke="#FFFFFF" stroke-width="2.5"/></svg>`;
 }
 
+function targetSvg(color: string): string {
+  const fill = /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#D32F2F";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${TARGET_SIZE}" height="${TARGET_SIZE}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#D32F2F" stroke-width="2.5"/><circle cx="12" cy="12" r="6.5" fill="${fill}" stroke="#FFFFFF" stroke-width="3"/></svg>`;
+}
+
 export async function renderTrainMap(
   tracks: ElesiteMapTrack[],
   trains: ElesiteMapTrain[],
+  target?: MapTarget | null,
+  framing: MapFraming = "line",
 ): Promise<Buffer | null> {
   const created: string[] = [];
   try {
@@ -44,7 +61,8 @@ export async function renderTrainMap(
       .slice(0, MAX_TRAINS);
 
     for (const train of plotted) {
-      const color = train.color ?? "#FF7700";
+      if (target && train.lat === target.lat && train.lng === target.lng) continue;
+      const color = target ? "#9E9E9E" : (train.color ?? "#FF7700");
       let path = byColor.get(color);
       if (!path) {
         path = join(tmpdir(), `mikanbot-train-${randomUUID()}.svg`);
@@ -64,7 +82,27 @@ export async function renderTrainMap(
       });
     }
 
-    await map.render();
+    if (target) {
+      const path = join(tmpdir(), `mikanbot-target-${randomUUID()}.svg`);
+      await writeFile(path, targetSvg(target.color ?? "#D32F2F"));
+      created.push(path);
+      map.addMarker({
+        coord: [target.lng, target.lat],
+        img: path,
+        width: TARGET_SIZE,
+        height: TARGET_SIZE,
+        drawWidth: TARGET_SIZE,
+        drawHeight: TARGET_SIZE,
+        offsetX: TARGET_SIZE / 2,
+        offsetY: TARGET_SIZE / 2,
+      });
+    }
+
+    if (target && framing === "train") {
+      await map.render([target.lng, target.lat], TRAIN_ZOOM);
+    } else {
+      await map.render();
+    }
     return await map.image.buffer("image/png");
   } catch (error) {
     Sentry.captureException(error, { tags: { source: "trainMap" } });

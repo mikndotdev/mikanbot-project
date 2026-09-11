@@ -124,6 +124,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
     retsubanId: target.id,
     page: 0,
     expanded: false,
+    map: "off",
   });
   return interaction.editReply(message);
 };

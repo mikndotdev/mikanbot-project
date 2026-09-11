@@ -53,6 +53,7 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
         retsubanId: assignment.retsubanId,
         page: 0,
         expanded: false,
+        map: "off",
       },
       owner,
     );

@@ -5,6 +5,8 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ContainerBuilder,
+  MediaGalleryBuilder,
+  MediaGalleryItemBuilder,
   MessageFlags,
   SectionBuilder,
   SeparatorBuilder,
@@ -14,6 +16,8 @@ import {
 } from "discord.js";
 import {
   getDailyUnyou,
+  getMapGeometry,
+  getMapTrainPositions,
   getRailwayInfo,
   getRetsubanTimeById,
   getTrainPositions,
@@ -33,6 +37,7 @@ import type {
 } from "@/lib/elesite";
 import { formatHhmm, getOperationalDay, parseClockToMinutes } from "@/lib/jst";
 import { lineEmoji } from "@/lib/train-logos";
+import { renderTrainMap } from "@/lib/train-map";
 import {
   iconUrlFromPath,
   isShinkansen,
@@ -47,31 +52,62 @@ const LOADING_EMOJI = "<a:loading:1272805571585642506>";
 const BAR_CELLS = 14;
 export const STOPS_PER_PAGE = 12;
 
-export type TrainAction = "refresh" | "prev" | "next" | "set" | "expand" | "collapse";
+export type TrainAction =
+  | "refresh"
+  | "prev"
+  | "next"
+  | "set"
+  | "expand"
+  | "collapse"
+  | "maptrain"
+  | "mapline"
+  | "mapoff";
+
+export type MapMode = "off" | "train" | "line";
 
 export interface TrainState {
   rosenCode: string;
   retsubanId: number;
   page: number;
   expanded: boolean;
+  map: MapMode;
 }
 
+const MAP_CODES: Record<MapMode, string> = { off: "0", train: "1", line: "2" };
+const MAP_FROM_CODE: Record<string, MapMode> = { "0": "off", "1": "train", "2": "line" };
+
 export function encodeTrainId(action: TrainAction, state: TrainState): string {
-  return `train:${action}:${state.rosenCode}:${state.retsubanId}:${state.page}:${state.expanded ? 1 : 0}`;
+  return `train:${action}:${state.rosenCode}:${state.retsubanId}:${state.page}:${state.expanded ? 1 : 0}:${MAP_CODES[state.map]}`;
 }
 
 export function decodeTrainId(customId: string): { action: TrainAction; state: TrainState } | null {
   const parts = customId.split(":");
-  if (parts.length !== 6 || parts[0] !== "train") return null;
+  if (parts.length !== 7 || parts[0] !== "train") return null;
   const action = parts[1] as TrainAction;
-  const known: TrainAction[] = ["refresh", "prev", "next", "set", "expand", "collapse"];
+  const known: TrainAction[] = [
+    "refresh",
+    "prev",
+    "next",
+    "set",
+    "expand",
+    "collapse",
+    "maptrain",
+    "mapline",
+    "mapoff",
+  ];
   if (!known.includes(action)) return null;
   const retsubanId = Number(parts[3]);
   const page = Number(parts[4]);
   if (!Number.isFinite(retsubanId) || !Number.isFinite(page)) return null;
   return {
     action,
-    state: { rosenCode: parts[2] ?? "", retsubanId, page, expanded: parts[5] === "1" },
+    state: {
+      rosenCode: parts[2] ?? "",
+      retsubanId,
+      page,
+      expanded: parts[5] === "1",
+      map: MAP_FROM_CODE[parts[6] ?? "0"] ?? "off",
+    },
   };
 }
 
@@ -447,10 +483,16 @@ export interface TrainOwner {
   isSelf: boolean;
 }
 
+export interface TrainMapResult {
+  image: Buffer | null;
+  located: boolean;
+}
+
 export interface BuildTrainArgs {
   state: TrainState;
   owner?: TrainOwner;
   unyou?: ElesiteUnyouLeg[] | null;
+  map?: TrainMapResult | null;
   detail: ElesiteRetsubanTime;
   positions: ElesitePositions | null;
   railwayInfo: ElesiteRailwayInfo | null;
@@ -459,7 +501,7 @@ export interface BuildTrainArgs {
 }
 
 export function buildTrainMessage(args: BuildTrainArgs) {
-  const { state, detail, positions, railwayInfo, icon, owner, unyou } = args;
+  const { state, detail, positions, railwayInfo, icon, owner, unyou, map } = args;
   const now = args.now ?? new Date();
   const day = getOperationalDay(now);
 
@@ -558,6 +600,21 @@ export function buildTrainMessage(args: BuildTrainArgs) {
     );
   }
 
+  if (expanded && map?.image) {
+    container.addMediaGalleryComponents(
+      new MediaGalleryBuilder().addItems(
+        new MediaGalleryItemBuilder().setURL("attachment://map.png").setDescription("路線地図"),
+      ),
+    );
+    if (!map.located) {
+      container.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(
+          "-# この列車は地図データのある区間の外にいます（路線のみ表示）",
+        ),
+      );
+    }
+  }
+
   container.addSeparatorComponents(
     new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small),
   );
@@ -620,6 +677,41 @@ export function buildTrainMessage(args: BuildTrainArgs) {
 
   container.addActionRowComponents(new ActionRowBuilder<ButtonBuilder>().addComponents(...buttons));
 
+  if (expanded) {
+    const mapRow: ButtonBuilder[] = [];
+    if (state.map === "off") {
+      mapRow.push(
+        new ButtonBuilder()
+          .setCustomId(encodeTrainId("maptrain", pagedState))
+          .setLabel("地図を表示")
+          .setEmoji("🗺️")
+          .setStyle(ButtonStyle.Secondary),
+      );
+    } else {
+      mapRow.push(
+        state.map === "train"
+          ? new ButtonBuilder()
+              .setCustomId(encodeTrainId("mapline", pagedState))
+              .setLabel("全線表示")
+              .setEmoji("🗺️")
+              .setStyle(ButtonStyle.Secondary)
+          : new ButtonBuilder()
+              .setCustomId(encodeTrainId("maptrain", pagedState))
+              .setLabel("列車に寄る")
+              .setEmoji("🔍")
+              .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId(encodeTrainId("mapoff", pagedState))
+          .setLabel("地図を閉じる")
+          .setEmoji("❌")
+          .setStyle(ButtonStyle.Secondary),
+      );
+    }
+    container.addActionRowComponents(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(...mapRow),
+    );
+  }
+
   container.addSeparatorComponents(
     new SeparatorBuilder().setDivider(false).setSpacing(SeparatorSpacingSize.Small),
   );
@@ -630,6 +722,9 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   );
 
   const files = icon ? [new AttachmentBuilder(icon.buffer, { name: icon.name })] : [];
+  if (expanded && map?.image) {
+    files.push(new AttachmentBuilder(map.image, { name: "map.png" }));
+  }
 
   return {
     flags: MessageFlags.IsComponentsV2 as const,
@@ -649,11 +744,15 @@ export async function renderTrainView(
     return buildNoticeMessage("## 🚆 列車情報\n路線のダイヤ情報を取得できませんでした。");
   }
 
-  const [detail, positions, railwayInfo, unyou] = await Promise.all([
+  const wantsMap = state.expanded && state.map !== "off";
+
+  const [detail, positions, railwayInfo, unyou, tracks, mapTrains] = await Promise.all([
     getRetsubanTimeById(state.retsubanId, context.selectDate),
     getTrainPositions(state.rosenCode, context.dayId, now),
     getRailwayInfo(state.rosenCode, context.selectDate),
     state.expanded ? getDailyUnyou(state.retsubanId, context.selectDate) : Promise.resolve(null),
+    wantsMap ? getMapGeometry(state.rosenCode, context.selectDate) : Promise.resolve(null),
+    wantsMap ? getMapTrainPositions(state.rosenCode, context.dayId, now) : Promise.resolve(null),
   ]);
 
   if (!detail || !detail.retsuban) {
@@ -666,5 +765,30 @@ export async function renderTrainView(
     resolveTrainIconUrl(state.rosenCode, detail, positions, state.retsubanId),
   );
 
-  return buildTrainMessage({ state, owner, detail, positions, railwayInfo, icon, unyou, now });
+  let map: TrainMapResult | null = null;
+  if (wantsMap && tracks && tracks.length > 0) {
+    const here = (mapTrains ?? []).find(
+      (t) => t.retsuban === detail.retsuban && typeof t.lat === "number",
+    );
+    const target = here ? { lat: here.lat as number, lng: here.lng as number } : null;
+    const image = await renderTrainMap(
+      tracks,
+      mapTrains ?? [],
+      target,
+      target && state.map === "train" ? "train" : "line",
+    );
+    map = { image, located: Boolean(target) };
+  }
+
+  return buildTrainMessage({
+    state,
+    owner,
+    detail,
+    positions,
+    railwayInfo,
+    icon,
+    unyou,
+    map,
+    now,
+  });
 }

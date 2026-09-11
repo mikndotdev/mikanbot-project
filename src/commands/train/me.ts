@@ -36,6 +36,7 @@ export const meExecute: SubcommandExecuteFunction<typeof meOptions> = async (int
         retsubanId: assignment.retsubanId,
         page: 0,
         expanded: false,
+        map: "off",
       },
       owner,
     );

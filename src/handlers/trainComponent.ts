@@ -1,5 +1,6 @@
 import type { ButtonInteraction } from "discord.js";
 import { decodeTrainId, renderTrainView } from "@/lib/train";
+import type { MapMode } from "@/lib/train";
 import { setAssignment } from "@/lib/train-assignment";
 import { lineLabel, stripRouteTag } from "@/lib/train-lines";
 import { resolveAssignment } from "@/commands/train/shared";
@@ -31,7 +32,15 @@ export async function handleTrainComponent(interaction: ButtonInteraction) {
 
   const page = action === "prev" ? state.page - 1 : action === "next" ? state.page + 1 : state.page;
   const expanded = action === "expand" ? true : action === "collapse" ? false : state.expanded;
-  const message = await renderTrainView({ ...state, page, expanded });
+  const map =
+    action === "maptrain"
+      ? "train"
+      : action === "mapline"
+        ? "line"
+        : action === "mapoff" || action === "collapse"
+          ? "off"
+          : state.map;
+  const message = await renderTrainView({ ...state, page, expanded, map: map as MapMode });
 
   await interaction.editReply(message);
 }
