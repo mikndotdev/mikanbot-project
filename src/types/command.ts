@@ -29,6 +29,7 @@ export type CommandOption = {
   minLength?: number;
   maxLength?: number;
   autocomplete?: boolean;
+  channelTypes?: readonly number[];
   nameLocalizations?: Record<string, string>;
   descriptionLocalizations?: Record<string, string>;
 };

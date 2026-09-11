@@ -58,3 +58,13 @@ model trainAssignment {
   selectDate String
   setAt      DateTime @default(now())
 }
+
+model trainSubscription {
+  id        String   @id
+  guildId   String
+  channelId String
+  rosenCode String
+  createdBy String
+  failures  Int      @default(0)
+  createdAt DateTime @default(now())
+}

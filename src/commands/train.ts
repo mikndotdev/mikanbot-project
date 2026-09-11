@@ -15,6 +15,15 @@ import {
 } from "@/commands/train/formation";
 import { vehicleAutocomplete, vehicleConfig, vehicleExecute } from "@/commands/train/vehicle";
 import { mapAutocomplete, mapConfig, mapExecute } from "@/commands/train/map";
+import {
+  statusSubscribeAutocomplete,
+  statusSubscribeConfig,
+  statusSubscribeExecute,
+} from "@/commands/train/status-subscribe";
+import {
+  listSubscriptionsConfig,
+  listSubscriptionsExecute,
+} from "@/commands/train/list-subscriptions";
 
 export const train = createCommandWithSubcommands({
   name: "train",
@@ -34,4 +43,6 @@ export const train = createCommandWithSubcommands({
   .subcommand(formationConfig, formationExecute, formationAutocomplete)
   .subcommand(vehicleConfig, vehicleExecute, vehicleAutocomplete)
   .subcommand(mapConfig, mapExecute, mapAutocomplete)
+  .subcommand(statusSubscribeConfig, statusSubscribeExecute, statusSubscribeAutocomplete)
+  .subcommand(listSubscriptionsConfig, listSubscriptionsExecute)
   .build();

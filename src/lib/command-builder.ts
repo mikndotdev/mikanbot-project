@@ -36,6 +36,7 @@ function serializeOption(option: CommandOption): SerializedOption {
     required: option.required,
     choices: option.choices,
     autocomplete: option.autocomplete,
+    channel_types: option.channelTypes,
     min_value: option.minValue,
     max_value: option.maxValue,
     min_length: option.minLength,

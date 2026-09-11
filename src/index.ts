@@ -12,6 +12,7 @@ import { instafix } from "@/handlers/instafix";
 import { handleFlightComponent } from "@/handlers/flightComponent";
 import { handlePlaneComponent } from "@/handlers/planeComponent";
 import { handleTrainComponent } from "@/handlers/trainComponent";
+import { handleTrainSubComponent } from "@/handlers/trainSubComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
 import * as Sentry from "@sentry/bun";
@@ -76,6 +77,7 @@ client.on("clientReady", () => {
   Sentry.logger.info(Sentry.logger.fmt`Logged in as ${client.user?.tag}!`);
   deployCommands();
   setPresence(client);
+  startTrainAlerts(client);
 });
 
 client.on("messageReactionAdd", async (reaction, user) => {
@@ -170,6 +172,13 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("train:")) {
       try {
         await handleTrainComponent(interaction);
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+    }
+    if (interaction.customId.startsWith("trainsub:")) {
+      try {
+        await handleTrainSubComponent(interaction);
       } catch (e) {
         Sentry.captureException(e);
       }
