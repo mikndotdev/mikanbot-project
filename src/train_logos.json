@@ -1,0 +1,651 @@
+{
+  "source": "Wikidata P154/P158/P2910 → jawiki article files → Commons search → official company sites",
+  "format": "Discord application emoji (128x128 PNG), uploaded to application 937205549072801792",
+  "note": "Replaces src/train_logos/manifest.json; the image directory is no longer needed. photo_fallbacks are photographs, not official logos.",
+  "photo_fallbacks": ["若桜鉄道", "土佐くろしお鉄道"],
+  "count": 107,
+  "companies": {
+    "愛知環状鉄道": {
+      "name": "aichi_loop",
+      "id": "1548005881478651944",
+      "markdown": "<:aichi_loop:1548005881478651944>",
+      "source": "Aikan logomark.svg"
+    },
+    "あいの風とやま鉄道": {
+      "name": "ainokaze",
+      "id": "1548005739706982472",
+      "markdown": "<:ainokaze:1548005739706982472>",
+      "source": "Ainokaze Toyama Railway logo.svg"
+    },
+    "会津鉄道": {
+      "name": "aizu",
+      "id": "1548005803217391761",
+      "markdown": "<:aizu:1548005803217391761>",
+      "source": "Aizu Tetsudo logo 2.svg"
+    },
+    "秋田内陸縦貫鉄道": {
+      "name": "akita_nairiku",
+      "id": "1548005954895741018",
+      "markdown": "<:akita_nairiku:1548005954895741018>",
+      "source": "https://www.akita-nairiku.com/images/common/header_logo.png [official-site]"
+    },
+    "甘木鉄道": {
+      "name": "amagi",
+      "id": "1548005929977389126",
+      "markdown": "<:amagi:1548005929977389126>",
+      "source": "Amagi Railway logo.png [commons]"
+    },
+    "名古屋臨海高速鉄道": {
+      "name": "aonami",
+      "id": "1548005831105060976",
+      "markdown": "<:aonami:1548005831105060976>",
+      "source": "Aonami line logo.svg"
+    },
+    "阿佐海岸鉄道": {
+      "name": "asa_kaigan",
+      "id": "1548006021677457489",
+      "markdown": "<:asa_kaigan:1548006021677457489>",
+      "source": "https://asatetu.com/dmv/wp-content/uploads/2021/11/logo.png [official-site]"
+    },
+    "千葉都市モノレール": {
+      "name": "chiba_monorail",
+      "id": "1548005820531482654",
+      "markdown": "<:chiba_monorail:1548005820531482654>",
+      "source": "Chiba Urban Monorail Logo.svg"
+    },
+    "秩父鉄道": {
+      "name": "chichibu",
+      "id": "1548005957689286726",
+      "markdown": "<:chichibu:1548005957689286726>",
+      "source": "CTK logomark 2019.svg"
+    },
+    "筑豊電気鉄道": {
+      "name": "chikuho",
+      "id": "1548005960402862211",
+      "markdown": "<:chikuho:1548005960402862211>",
+      "source": "Chikutetsu logo.svg"
+    },
+    "智頭急行": {
+      "name": "chizu",
+      "id": "1548005885912289300",
+      "markdown": "<:chizu:1548005885912289300>",
+      "source": "Chizu Express KK logo.svg"
+    },
+    "銚子電気鉄道": {
+      "name": "choshi",
+      "id": "1548006001792524389",
+      "markdown": "<:choshi:1548006001792524389>",
+      "source": "ファイル:CDK Logomark.svg [jawiki-article]"
+    },
+    "道南いさりび鉄道": {
+      "name": "donan_isaribi",
+      "id": "1548005991159955507",
+      "markdown": "<:donan_isaribi:1548005991159955507>",
+      "source": "South Hokkaido Railway Company logo.svg"
+    },
+    "えちごトキめき鉄道": {
+      "name": "echigo_tokimeki",
+      "id": "1548005742357913663",
+      "markdown": "<:echigo_tokimeki:1548005742357913663>",
+      "source": "Echigo-TOKImeki logomark.svg"
+    },
+    "叡山電鉄": {
+      "name": "eizan",
+      "id": "1548005825736351894",
+      "markdown": "<:eizan:1548005825736351894>",
+      "source": "Eizan Electric Railway Logo.svg [jawiki-article]"
+    },
+    "江ノ電": {
+      "name": "enoden",
+      "id": "1548005917826748476",
+      "markdown": "<:enoden:1548005917826748476>",
+      "source": "EnoshimaElectricRailway logo full.svg"
+    },
+    "遠州鉄道": {
+      "name": "enshu",
+      "id": "1548005993852702831",
+      "markdown": "<:enshu:1548005993852702831>",
+      "source": "Entetsu logo.svg"
+    },
+    "富士山麓電気鉄道": {
+      "name": "fujisanroku",
+      "id": "1548005861958361108",
+      "markdown": "<:fujisanroku:1548005861958361108>",
+      "source": "Fujikyu Railway Logo 1.svg [commons]"
+    },
+    "福岡市営": {
+      "name": "fukuoka_city",
+      "id": "1548005948189180055",
+      "markdown": "<:fukuoka_city:1548005948189180055>",
+      "source": "Fukuoka City Subway Logo.svg"
+    },
+    "福島交通": {
+      "name": "fukushima_kotsu",
+      "id": "1548005951846752368",
+      "markdown": "<:fukushima_kotsu:1548005951846752368>",
+      "source": "Fukushima Transportation Logomark.svg [jawiki-article]"
+    },
+    "阪堺": {
+      "name": "hankai",
+      "id": "1548006007429406921",
+      "markdown": "<:hankai:1548006007429406921>",
+      "source": "Nankai group logo.svg"
+    },
+    "阪急": {
+      "name": "hankyu",
+      "id": "1548006010411814982",
+      "markdown": "<:hankyu:1548006010411814982>",
+      "source": "Hankyu with word.svg"
+    },
+    "阪神": {
+      "name": "hanshin",
+      "id": "1548006015625072701",
+      "markdown": "<:hanshin:1548006015625072701>",
+      "source": "Hanshin-ER Logo 2024S.svg [P154]"
+    },
+    "ハピラインふくい": {
+      "name": "hapiline_fukui",
+      "id": "1548005762041774201",
+      "markdown": "<:hapiline_fukui:1548005762041774201>",
+      "source": "Hapi-Line Fukui Logomark.svg"
+    },
+    "肥薩おれんじ鉄道": {
+      "name": "hisatsu_orange",
+      "id": "1548005966312636516",
+      "markdown": "<:hisatsu_orange:1548005966312636516>",
+      "source": "Hisatsu Orange Railway Logo.svg"
+    },
+    "北条鉄道": {
+      "name": "hojo",
+      "id": "1548005814956986429",
+      "markdown": "<:hojo:1548005814956986429>",
+      "source": "Hojo-rogo2.png"
+    },
+    "北越急行": {
+      "name": "hokuetsu",
+      "id": "1548005817775693827",
+      "markdown": "<:hokuetsu:1548005817775693827>",
+      "source": "Hokuetsu Kyuko logo.svg"
+    },
+    "井原鉄道": {
+      "name": "ibara",
+      "id": "1548005773143969923",
+      "markdown": "<:ibara:1548005773143969923>",
+      "source": "File:Ibara Railway Logomark.svg [commons-search]"
+    },
+    "伊賀鉄道": {
+      "name": "iga_railway",
+      "id": "1548005800734097440",
+      "markdown": "<:iga_railway:1548005800734097440>",
+      "source": "Iga Railway Logo.svg"
+    },
+    "IRいしかわ鉄道": {
+      "name": "ir_ishikawa",
+      "id": "1548005715988193302",
+      "markdown": "<:ir_ishikawa:1548005715988193302>",
+      "source": "IR Ishikawa Railway logo.svg [P154]"
+    },
+    "伊勢鉄道": {
+      "name": "ise",
+      "id": "1548005792568049725",
+      "markdown": "<:ise:1548005792568049725>",
+      "source": "Ise Railway Logomark.svg [jawiki-article]"
+    },
+    "伊豆箱根鉄道": {
+      "name": "izuhakone",
+      "id": "1548005798565908620",
+      "markdown": "<:izuhakone:1548005798565908620>",
+      "source": "IzuHakoneRailway mark.svg"
+    },
+    "伊豆急": {
+      "name": "izukyu",
+      "id": "1548005795138904076",
+      "markdown": "<:izukyu:1548005795138904076>",
+      "source": "IzukyuLogotype.svg"
+    },
+    "JR東海": {
+      "name": "jr_central",
+      "id": "1548005730756599918",
+      "markdown": "<:jr_central:1548005730756599918>",
+      "source": "JR logo (central).svg"
+    },
+    "JR東日本": {
+      "name": "jr_east",
+      "id": "1548005727325388850",
+      "markdown": "<:jr_east:1548005727325388850>",
+      "source": "JR logo (east).svg"
+    },
+    "JR北海道": {
+      "name": "jr_hokkaido",
+      "id": "1548005722061799585",
+      "markdown": "<:jr_hokkaido:1548005722061799585>",
+      "source": "JR logo (hokkaido).svg"
+    },
+    "JR九州": {
+      "name": "jr_kyushu",
+      "id": "1548005718949502987",
+      "markdown": "<:jr_kyushu:1548005718949502987>",
+      "source": "JR logo (kyushu).svg [P154]"
+    },
+    "JR四国": {
+      "name": "jr_shikoku",
+      "id": "1548005724578123829",
+      "markdown": "<:jr_shikoku:1548005724578123829>",
+      "source": "JR logo (shikoku).svg"
+    },
+    "JR東海交通事業": {
+      "name": "jr_tkj",
+      "id": "1548005732966731798",
+      "markdown": "<:jr_tkj:1548005732966731798>",
+      "source": "TKJ logomark.svg"
+    },
+    "JR西日本": {
+      "name": "jr_west",
+      "id": "1548005736309719152",
+      "markdown": "<:jr_west:1548005736309719152>",
+      "source": "JR logo (west).svg"
+    },
+    "関東鉄道": {
+      "name": "kanto_railway",
+      "id": "1548006004438859896",
+      "markdown": "<:kanto_railway:1548006004438859896>",
+      "source": "Kantetsu Logo S.svg"
+    },
+    "京阪": {
+      "name": "keihan",
+      "id": "1548005787576832100",
+      "markdown": "<:keihan:1548005787576832100>",
+      "source": "Keihan Logo S.svg"
+    },
+    "京急": {
+      "name": "keikyu",
+      "id": "1548005776180912209",
+      "markdown": "<:keikyu:1548005776180912209>",
+      "source": "Keikyu logo.svg"
+    },
+    "京王": {
+      "name": "keio",
+      "id": "1548005781985558640",
+      "markdown": "<:keio:1548005781985558640>",
+      "source": "KeioRailway logo.svg"
+    },
+    "京成・北総": {
+      "name": "keisei",
+      "id": "1548005778714263665",
+      "markdown": "<:keisei:1548005778714263665>",
+      "source": "Keisei Logo.svg"
+    },
+    "近鉄": {
+      "name": "kintetsu",
+      "id": "1548005988559355954",
+      "markdown": "<:kintetsu:1548005988559355954>",
+      "source": "Kintetsu Logo full.svg [P154]"
+    },
+    "衣浦臨海鉄道": {
+      "name": "kinuura",
+      "id": "1548005974411841547",
+      "markdown": "<:kinuura:1548005974411841547>",
+      "source": "File:KRR logomark.svg [commons-search]"
+    },
+    "紀州鉄道": {
+      "name": "kishu",
+      "id": "1548005963272028171",
+      "markdown": "<:kishu:1548005963272028171>",
+      "source": "Kishu Railway logo.png"
+    },
+    "北九州モノレール": {
+      "name": "kitakyushu_monorail",
+      "id": "1548005808980103254",
+      "markdown": "<:kitakyushu_monorail:1548005808980103254>",
+      "source": "Kitakyushu monorail logomark.svg"
+    },
+    "北大阪急行": {
+      "name": "kitaosaka_kyuko",
+      "id": "1548005812247593060",
+      "markdown": "<:kitaosaka_kyuko:1548005812247593060>",
+      "source": "Kitakyu-logo.svg"
+    },
+    "神戸市営": {
+      "name": "kobe_city",
+      "id": "1548005939070767135",
+      "markdown": "<:kobe_city:1548005939070767135>",
+      "source": "KCTB logomark.svg"
+    },
+    "神戸電鉄": {
+      "name": "kobe_dentetsu",
+      "id": "1548005945483726938",
+      "markdown": "<:kobe_dentetsu:1548005945483726938>",
+      "source": "Kobe railway logo mark.svg"
+    },
+    "神戸新交通": {
+      "name": "kobe_new_transit",
+      "id": "1548005942250045533",
+      "markdown": "<:kobe_new_transit:1548005942250045533>",
+      "source": "Kobe New Transit logo.svg"
+    },
+    "弘南鉄道": {
+      "name": "konan",
+      "id": "1548005878286782514",
+      "markdown": "<:konan:1548005878286782514>",
+      "source": "Konan Tetsudo Logo 2.svg"
+    },
+    "ことでん": {
+      "name": "kotoden",
+      "id": "1548005745616756897",
+      "markdown": "<:kotoden:1548005745616756897>",
+      "source": "Kotoden Logo S.svg"
+    },
+    "熊本電鉄": {
+      "name": "kumamoto_dentetsu",
+      "id": "1548005926638719218",
+      "markdown": "<:kumamoto_dentetsu:1548005926638719218>",
+      "source": "Kumaden Logo.svg"
+    },
+    "京都市営": {
+      "name": "kyoto_city",
+      "id": "1548005784972165180",
+      "markdown": "<:kyoto_city:1548005784972165180>",
+      "source": "Kyoto MTB Logo.svg"
+    },
+    "名鉄": {
+      "name": "meitetsu",
+      "id": "1548005833697267753",
+      "markdown": "<:meitetsu:1548005833697267753>",
+      "source": "Meitetsu logo.svg"
+    },
+    "水間鉄道": {
+      "name": "mizuma",
+      "id": "1548005914580095038",
+      "markdown": "<:mizuma:1548005914580095038>",
+      "source": "Mizuma Railway Logomark.svg [jawiki-article]"
+    },
+    "名古屋市営": {
+      "name": "nagoya_city",
+      "id": "1548005828274032661",
+      "markdown": "<:nagoya_city:1548005828274032661>",
+      "source": "TBCN logomark.svg"
+    },
+    "南海": {
+      "name": "nankai",
+      "id": "1548005823102328884",
+      "markdown": "<:nankai:1548005823102328884>",
+      "source": "Nankai logo with its slogan.svg"
+    },
+    "西鉄": {
+      "name": "nishitetsu",
+      "id": "1548005979583418540",
+      "markdown": "<:nishitetsu:1548005979583418540>",
+      "source": "Nishitetsu logo vector.svg"
+    },
+    "能勢電": {
+      "name": "noseden",
+      "id": "1548005969097916426",
+      "markdown": "<:noseden:1548005969097916426>",
+      "source": "Noseden-logo.svg"
+    },
+    "のと鉄道": {
+      "name": "noto",
+      "id": "1548005750973145098",
+      "markdown": "<:noto:1548005750973145098>",
+      "source": "Noto Tetudou Logomark.svg [P154]"
+    },
+    "小田急": {
+      "name": "odakyu",
+      "id": "1548005867280928838",
+      "markdown": "<:odakyu:1548005867280928838>",
+      "source": "OdakyuGroup logo.svg"
+    },
+    "小田急箱根": {
+      "name": "odakyu_hakone",
+      "id": "1548005870057562202",
+      "markdown": "<:odakyu_hakone:1548005870057562202>",
+      "source": "Odakyu Hakone logo.svg [P18]"
+    },
+    "近江鉄道": {
+      "name": "ohmi",
+      "id": "1548005985564623038",
+      "markdown": "<:ohmi:1548005985564623038>",
+      "source": "File:Ohmi Railway Group Logo.png [commons-search]"
+    },
+    "大阪メトロ": {
+      "name": "osaka_metro",
+      "id": "1548005850961158146",
+      "markdown": "<:osaka_metro:1548005850961158146>",
+      "source": "Osaka Metro logo 3.svg"
+    },
+    "大阪モノレール": {
+      "name": "osaka_monorail",
+      "id": "1548005853960081548",
+      "markdown": "<:osaka_monorail:1548005853960081548>",
+      "source": "Osaka monorail logo.svg"
+    },
+    "嵐電": {
+      "name": "randen",
+      "id": "1548005875661279272",
+      "markdown": "<:randen:1548005875661279272>",
+      "source": "Keifuku logo.svg"
+    },
+    "流鉄": {
+      "name": "ryutetsu",
+      "id": "1548005920309645322",
+      "markdown": "<:ryutetsu:1548005920309645322>",
+      "source": "Ryutetsu.png [P154]"
+    },
+    "埼玉新都市交通": {
+      "name": "saitama_new_transit",
+      "id": "1548005842106720386",
+      "markdown": "<:saitama_new_transit:1548005842106720386>",
+      "source": "Saitama New Urban Transit Logomark.svg"
+    },
+    "埼玉高速鉄道": {
+      "name": "saitama_railway",
+      "id": "1548005844690403510",
+      "markdown": "<:saitama_railway:1548005844690403510>",
+      "source": "Saitama Railway Logo.svg"
+    },
+    "三岐鉄道": {
+      "name": "sangi",
+      "id": "1548005764864540703",
+      "markdown": "<:sangi:1548005764864540703>",
+      "source": "Sangi Railway Logo.svg"
+    },
+    "山陽": {
+      "name": "sanyo",
+      "id": "1548005872922534058",
+      "markdown": "<:sanyo:1548005872922534058>",
+      "source": "Sanyo electric railway logo.svg"
+    },
+    "西武": {
+      "name": "seibu",
+      "id": "1548005976932614244",
+      "markdown": "<:seibu:1548005976932614244>",
+      "source": "SeibuRailway logo.svg"
+    },
+    "信楽高原鐡道": {
+      "name": "shigaraki",
+      "id": "1548005806270713876",
+      "markdown": "<:shigaraki:1548005806270713876>",
+      "source": "https://www.city.koka.lg.jp/Images/new_logo.gif [official-site]"
+    },
+    "静岡鉄道": {
+      "name": "shizutetsu",
+      "id": "1548006024454082710",
+      "markdown": "<:shizutetsu:1548006024454082710>",
+      "source": "Shizutetsu logo 2019.svg"
+    },
+    "湘南モノレール": {
+      "name": "shonan_monorail",
+      "id": "1548005923648176319",
+      "markdown": "<:shonan_monorail:1548005923648176319>",
+      "source": "ShonanMonorail logo.svg"
+    },
+    "相鉄": {
+      "name": "sotetsu",
+      "id": "1548005935895814154",
+      "markdown": "<:sotetsu:1548005935895814154>",
+      "source": "SOTETSU logo.svg"
+    },
+    "多摩都市モノレール": {
+      "name": "tama_monorail",
+      "id": "1548005847811100730",
+      "markdown": "<:tama_monorail:1548005847811100730>",
+      "source": "Tama monorail.svg"
+    },
+    "丹鉄": {
+      "name": "tantetsu",
+      "id": "1548005770615070762",
+      "markdown": "<:tantetsu:1548005770615070762>",
+      "source": "Logo Willer Trains.svg"
+    },
+    "樽見鉄道": {
+      "name": "tarumi",
+      "id": "1548005912084480060",
+      "markdown": "<:tarumi:1548005912084480060>",
+      "source": "Tarutetsu logomark.svg [P154]"
+    },
+    "天竜浜名湖鉄道": {
+      "name": "tenhama",
+      "id": "1548005856522539109",
+      "markdown": "<:tenhama:1548005856522539109>",
+      "source": "THR Logomark.svg [jawiki-article]"
+    },
+    "東武": {
+      "name": "tobu",
+      "id": "1548005901099728897",
+      "markdown": "<:tobu:1548005901099728897>",
+      "source": "Tōbu Tetsudō Logo.svg"
+    },
+    "都営": {
+      "name": "toei",
+      "id": "1548005996146720811",
+      "markdown": "<:toei:1548005996146720811>",
+      "source": "Tokyo Metropolitan Bureau of Transportation logo.svg"
+    },
+    "東京メトロ": {
+      "name": "tokyo_metro",
+      "id": "1548005888512761886",
+      "markdown": "<:tokyo_metro:1548005888512761886>",
+      "source": "Tokyo Metro logo (full).svg"
+    },
+    "東京モノレール": {
+      "name": "tokyo_monorail",
+      "id": "1548005891025145978",
+      "markdown": "<:tokyo_monorail:1548005891025145978>",
+      "source": "Tokyo monorail.svg"
+    },
+    "東急・横高": {
+      "name": "tokyu",
+      "id": "1548005896616017980",
+      "markdown": "<:tokyu:1548005896616017980>",
+      "source": "Tokyu Railways Logo.svg"
+    },
+    "土佐くろしお鉄道": {
+      "name": "tosa_kuroshio",
+      "id": "1548005839447793705",
+      "markdown": "<:tosa_kuroshio:1548005839447793705>",
+      "source": "Tosa Kuroshio Railway Nakamura Station 20100825 1.jpg [P18]"
+    },
+    "富山地鉄": {
+      "name": "toyama_chitetsu",
+      "id": "1548005864659619840",
+      "markdown": "<:toyama_chitetsu:1548005864659619840>",
+      "source": "Chitetsu logomark.svg"
+    },
+    "東葉高速鉄道": {
+      "name": "toyo_rapid",
+      "id": "1548005903733760001",
+      "markdown": "<:toyo_rapid:1548005903733760001>",
+      "source": "Toyo Rapid Railway logo (wide).svg"
+    },
+    "豊橋鉄道": {
+      "name": "toyohashi",
+      "id": "1548005982385475685",
+      "markdown": "<:toyohashi:1548005982385475685>",
+      "source": "Toyotetsu logomark.svg"
+    },
+    "つくばエクスプレス": {
+      "name": "tsukuba_express",
+      "id": "1548005748452233349",
+      "markdown": "<:tsukuba_express:1548005748452233349>",
+      "source": "Tsukuba Express symbol.svg [P154]"
+    },
+    "東京臨海高速鉄道": {
+      "name": "twr",
+      "id": "1548005894002843679",
+      "markdown": "<:twr:1548005894002843679>",
+      "source": "東京臨海高速鉄道ロゴマーク.svg"
+    },
+    "上田電鉄": {
+      "name": "ueda",
+      "id": "1548005767599231046",
+      "markdown": "<:ueda:1548005767599231046>",
+      "source": "Ueda Maruko Electric Railway Logomark.svg [commons]"
+    },
+    "宇都宮ライトレール": {
+      "name": "utsunomiya_lrt",
+      "id": "1548005859181731871",
+      "markdown": "<:utsunomiya_lrt:1548005859181731871>",
+      "source": "Utsunomiya lrt logo.svg"
+    },
+    "若桜鉄道": {
+      "name": "wakasa",
+      "id": "1548005971555655734",
+      "markdown": "<:wakasa:1548005971555655734>",
+      "source": "Wakasa sta01s4592.jpg [P18]"
+    },
+    "和歌山電鐵": {
+      "name": "wakayama_dentetsu",
+      "id": "1548005836218044488",
+      "markdown": "<:wakayama_dentetsu:1548005836218044488>",
+      "source": "Ryobi Group logo.svg"
+    },
+    "わたらせ渓谷鐵道": {
+      "name": "watarase",
+      "id": "1548005759407755275",
+      "markdown": "<:watarase:1548005759407755275>",
+      "source": "https://www.watetsu.com/assets/img/logo.png [official-site]"
+    },
+    "野岩鉄道": {
+      "name": "yagan",
+      "id": "1548005998948647113",
+      "markdown": "<:yagan:1548005998948647113>",
+      "source": "https://www.yagan.co.jp/assets/img/common/logo-yagan.png [official-site]"
+    },
+    "横浜市営": {
+      "name": "yokohama_city",
+      "id": "1548005909475631234",
+      "markdown": "<:yokohama_city:1548005909475631234>",
+      "source": "Yokohama City Transportation Emblem.svg"
+    },
+    "横浜シーサイドライン": {
+      "name": "yokohama_seaside",
+      "id": "1548005906892202024",
+      "markdown": "<:yokohama_seaside:1548005906892202024>",
+      "source": "Yokohama Seaside Line Symbol.svg"
+    },
+    "養老鉄道": {
+      "name": "yoro",
+      "id": "1548006027142758541",
+      "markdown": "<:yoro:1548006027142758541>",
+      "source": "Yoro Railway Logo.svg"
+    },
+    "ゆいレール": {
+      "name": "yui_rail",
+      "id": "1548005753481334815",
+      "markdown": "<:yui_rail:1548005753481334815>",
+      "source": "Okinawa City Monorail Logo.svg"
+    },
+    "由利高原鉄道": {
+      "name": "yuri_kogen",
+      "id": "1548005932921786418",
+      "markdown": "<:yuri_kogen:1548005932921786418>",
+      "source": "https://www.obako5.com/wp-content/uploads/2017/02/cropped-ab311b9d4b72eea36264542adf24cd4f.png [official-site site-icon]"
+    },
+    "ゆりかもめ": {
+      "name": "yurikamome",
+      "id": "1548005756572532837",
+      "markdown": "<:yurikamome:1548005756572532837>",
+      "source": "https://www.yurikamome.co.jp/assets/img/common/logo@2x.png [official-site]"
+    }
+  }
+}

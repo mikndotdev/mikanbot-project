@@ -26,6 +26,7 @@ import type {
   ElesiteTimetableGroup,
 } from "@/lib/elesite";
 import { getOperationalDay, parseClockToMinutes } from "@/lib/jst";
+import { lineEmoji } from "@/lib/train-logos";
 import {
   iconUrlFromPath,
   lineLabel,
@@ -403,7 +404,8 @@ export function buildTrainMessage(args: BuildTrainArgs) {
 
   const container = new ContainerBuilder().setAccentColor(parseAccent(positions?.rosen_color));
 
-  const title = `## ${stripRouteTag(detail.shubetsu)} ${stripRouteTag(detail.retsuban)}`;
+  const logo = lineEmoji(state.rosenCode);
+  const title = `## ${logo ? `${logo} ` : ""}${stripRouteTag(detail.shubetsu)} ${stripRouteTag(detail.retsuban)}`;
   const subtitle = `${lineLabel(state.rosenCode)} ・ ${detail.ikisaki}ゆき`;
   const ownerLine = owner ? `-# 👤 ${owner.displayName} の列車\n` : "";
   const header = `${ownerLine}${title}\n${subtitle}`;
