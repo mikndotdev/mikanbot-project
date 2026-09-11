@@ -148,5 +148,8 @@ export const listSubscriptionsExecute: SubcommandExecuteFunction<typeof listOpti
   }
 
   const subs = await listSubscriptions(interaction.guild.id);
-  return interaction.reply({ ...buildSubscriptionList(subs, 0), flags: "Ephemeral" });
+  return interaction.reply({
+    ...buildSubscriptionList(subs, 0),
+    flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral],
+  });
 };
