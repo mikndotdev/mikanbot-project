@@ -17,7 +17,7 @@ export const env = createEnv({
     STORAGE_ACCESS_KEY_ID: z.string(),
     STORAGE_SECRET_ACCESS_KEY: z.string(),
     STORAGE_BUCKET: z.string(),
-    STORAGE_PUBLIC_BASE_URL: z.string()
+    STORAGE_PUBLIC_BASE_URL: z.string(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

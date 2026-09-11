@@ -1,48 +1,29 @@
-import { createClient } from "redis";
 import { type CommandInteraction, type Message } from "discord.js";
-import { env } from "@/lib/env";
-import * as Sentry from "@sentry/bun";
+import { cacheGet, cacheSet } from "@/lib/redis";
 
-const redis = createClient({
-  url: env.REDIS_URL,
-});
-
-redis.on("error", (error) => {
-  Sentry.captureException(error, { tags: { source: "redis" } });
-});
-
-await redis.connect();
-
-export function setMessageRatelimit(type: string, message: Message) {
-  if (type == "msg") {
-    redis.set(`message:${message.guildId}:${message.author.id}`, `${message.guildId}`, { EX: 5 });
-  }
+export async function setMessageRatelimit(type: string, message: Message) {
+  if (type !== "msg") return;
+  await cacheSet(`message:${message.guildId}:${message.author.id}`, `${message.guildId}`, 5);
 }
 
 export async function checkMessageRatelimit(type: string, message: Message) {
-  if (type == "msg") {
-    const isLimited = await redis.get(`message:${message.guildId}:${message.author.id}`);
-    if (isLimited == `${message.guildId}`) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  if (type !== "msg") return false;
+  const isLimited = await cacheGet(`message:${message.guildId}:${message.author.id}`);
+  return isLimited === `${message.guildId}`;
 }
 
-export function setCommandRatelimit(
+export async function setCommandRatelimit(
   type: string,
   interaction: CommandInteraction,
   time: number,
   name: string,
 ) {
-  if (type == "cmd") {
-    redis.set(
-      `command:${interaction.guildId}:${interaction.user.id}:${name}`,
-      `${interaction.guildId}`,
-      { EX: time },
-    );
-  }
+  if (type !== "cmd") return;
+  await cacheSet(
+    `command:${interaction.guildId}:${interaction.user.id}:${name}`,
+    `${interaction.guildId}`,
+    time,
+  );
 }
 
 export async function checkCommandRatelimit(
@@ -50,31 +31,18 @@ export async function checkCommandRatelimit(
   interaction: CommandInteraction,
   name: string,
 ) {
-  if (type == "cmd") {
-    const isLimited = await redis.get(
-      `command:${interaction.guildId}:${interaction.user.id}:${name}`,
-    );
-    if (isLimited == `${interaction.guildId}`) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  if (type !== "cmd") return false;
+  const isLimited = await cacheGet(`command:${interaction.guildId}:${interaction.user.id}:${name}`);
+  return isLimited === `${interaction.guildId}`;
 }
 
 export async function setTranslationRatelimit(type: string, user: string, time: number) {
-  if (type == "translate") {
-    redis.set(`translation:${user}`, `${user}`, { EX: time });
-  }
+  if (type !== "translate") return;
+  await cacheSet(`translation:${user}`, `${user}`, time);
 }
 
 export async function checkTranslationRatelimit(type: string, user: string) {
-  if (type == "translate") {
-    const isLimited = await redis.get(`translation:${user}`);
-    if (isLimited == `${user}`) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  if (type !== "translate") return false;
+  const isLimited = await cacheGet(`translation:${user}`);
+  return isLimited === `${user}`;
 }

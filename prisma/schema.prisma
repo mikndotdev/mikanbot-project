@@ -47,3 +47,14 @@ model server {
   preferredLocale     String    @default("EN")
   xfixAutoTranslate   Boolean   @default(false)
 }
+
+model trainAssignment {
+  id         String   @id
+  rosenCode  String
+  retsuban   String
+  retsubanId Int
+  shubetsu   String
+  ikisaki    String
+  selectDate String
+  setAt      DateTime @default(now())
+}

@@ -5,6 +5,7 @@ import { rank } from "@/commands/rank";
 import { config } from "@/commands/config";
 import { aviation } from "@/commands/aviation";
 import { voice } from "@/commands/voice";
+import { train } from "@/commands/train";
 import { timeInMyTimezone } from "@/commands/message/time-in-my-timezone";
 import { convertToGif } from "@/commands/message/convert-to-gif";
 
@@ -15,6 +16,7 @@ export const commands = {
   config,
   aviation,
   voice,
+  train,
 } as const satisfies Record<string, Command<any> | CommandWithSubcommands>;
 
 export type CommandName = keyof typeof commands;

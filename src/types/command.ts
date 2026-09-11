@@ -1,6 +1,7 @@
 import type {
   ApplicationCommandOptionType,
   ApplicationCommandType,
+  AutocompleteInteraction,
   ChatInputCommandInteraction,
   MessageContextMenuCommandInteraction,
   PermissionResolvable,
@@ -27,13 +28,20 @@ export type CommandOption = {
   maxValue?: number;
   minLength?: number;
   maxLength?: number;
+  autocomplete?: boolean;
+  nameLocalizations?: Record<string, string>;
+  descriptionLocalizations?: Record<string, string>;
 };
+
+export type SerializedOption = Record<string, unknown>;
 
 export type SubcommandOption = {
   name: string;
   description: string;
   type: ApplicationCommandOptionType.Subcommand;
   options?: CommandOption[];
+  nameLocalizations?: Record<string, string>;
+  descriptionLocalizations?: Record<string, string>;
 };
 
 export type SubcommandGroupOption = {
@@ -73,6 +81,26 @@ export type InferOptionTypes<T extends readonly CommandOption[]> = {
   [K in T[number] as K["name"]]: InferSingleOption<K>;
 };
 
+export type AutocompleteChoice = { name: string; value: string | number };
+
+export interface AutocompleteContext<TOptions extends readonly CommandOption[] = []> {
+  name: string;
+  value: string;
+  options: Partial<InferOptionTypes<TOptions>>;
+  subcommand: string | null;
+}
+
+export type AutocompleteResolver<TOptions extends readonly CommandOption[] = []> = (
+  interaction: AutocompleteInteraction,
+  ctx: AutocompleteContext<TOptions>,
+) => Promise<AutocompleteChoice[]> | AutocompleteChoice[];
+
+export type AutocompleteHandlers<TOptions extends readonly CommandOption[] = []> = Partial<
+  Record<TOptions[number]["name"], AutocompleteResolver<TOptions>>
+>;
+
+export type AutocompleteHandlerMap = Record<string, AutocompleteResolver<any>>;
+
 export type CommandExecuteFunction<TOptions extends readonly CommandOption[] = []> = (
   interaction: ChatInputCommandInteraction,
   options: InferOptionTypes<TOptions>,
@@ -86,6 +114,8 @@ export type SubcommandExecuteFunction<TOptions extends readonly CommandOption[] 
 export interface BaseCommandConfig {
   name: string;
   description: string;
+  nameLocalizations?: Record<string, string>;
+  descriptionLocalizations?: Record<string, string>;
   cooldown?: number;
   premiumCooldown?: number;
   isPremium?: boolean;
@@ -104,6 +134,8 @@ export interface SubcommandConfig<TOptions extends readonly CommandOption[] = []
   name: string;
   description: string;
   options?: TOptions;
+  nameLocalizations?: Record<string, string>;
+  descriptionLocalizations?: Record<string, string>;
 }
 
 export interface Command<TOptions extends readonly CommandOption[] = []> {
@@ -116,11 +148,14 @@ export interface Command<TOptions extends readonly CommandOption[] = []> {
   userPermissions: PermissionResolvable[];
   enabled: boolean;
   options: TOptions | SubcommandOption[] | SubcommandGroupOption[];
+  autocomplete?: AutocompleteHandlerMap;
   execute: (interaction: ChatInputCommandInteraction) => Promise<unknown> | unknown;
   toJSON: () => {
     name: string;
     description: string;
-    options: TOptions | SubcommandOption[] | SubcommandGroupOption[];
+    options: SerializedOption[];
+    name_localizations?: Record<string, string>;
+    description_localizations?: Record<string, string>;
   };
 }
 
@@ -133,12 +168,20 @@ export interface CommandWithSubcommands {
   botPermissions: PermissionResolvable[];
   userPermissions: PermissionResolvable[];
   enabled: boolean;
-  subcommands: Record<string, SubcommandOption & { execute: SubcommandExecuteFunction<any> }>;
+  subcommands: Record<
+    string,
+    SubcommandOption & {
+      execute: SubcommandExecuteFunction<any>;
+      autocomplete?: AutocompleteHandlerMap;
+    }
+  >;
   execute: (interaction: ChatInputCommandInteraction) => Promise<unknown> | unknown;
   toJSON: () => {
     name: string;
     description: string;
-    options: SubcommandOption[];
+    options: SerializedOption[];
+    name_localizations?: Record<string, string>;
+    description_localizations?: Record<string, string>;
   };
 }
 

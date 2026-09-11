@@ -1,6 +1,7 @@
 import { start } from "@/api/server";
 import { deployCommands } from "@/deploy";
 import { setPresence } from "@/presence";
+import { handleAutocomplete } from "@/handlers/autocomplete";
 import { handleCommand } from "@/handlers/command";
 import { handleMessageCommand } from "@/handlers/messageCommand";
 import { handleLevel } from "@/handlers/lvl";
@@ -9,6 +10,7 @@ import { xfix } from "@/handlers/xfix";
 import { instafix } from "@/handlers/instafix";
 import { handleFlightComponent } from "@/handlers/flightComponent";
 import { handlePlaneComponent } from "@/handlers/planeComponent";
+import { handleTrainComponent } from "@/handlers/trainComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
 import * as Sentry from "@sentry/bun";
@@ -109,6 +111,14 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
+  if (interaction.isAutocomplete()) {
+    try {
+      await handleAutocomplete(interaction);
+    } catch (e) {
+      Sentry.captureException(e, { tags: { source: "autocomplete" } });
+    }
+    return;
+  }
   if (interaction.isChatInputCommand()) {
     Sentry.logger.info("Received command", {
       commandName: interaction.commandName,
@@ -149,6 +159,13 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("plane:")) {
       try {
         await handlePlaneComponent(interaction);
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+    }
+    if (interaction.customId.startsWith("train:")) {
+      try {
+        await handleTrainComponent(interaction);
       } catch (e) {
         Sentry.captureException(e);
       }

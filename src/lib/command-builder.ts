@@ -1,5 +1,8 @@
 import { ApplicationCommandType, type ChatInputCommandInteraction } from "discord.js";
 import type {
+  AutocompleteHandlerMap,
+  AutocompleteHandlers,
+  AutocompleteResolver,
   BaseCommandConfig,
   Command,
   CommandConfig,
@@ -11,14 +14,58 @@ import type {
   MessageCommand,
   MessageCommandConfig,
   MessageCommandExecuteFunction,
+  SerializedOption,
   SubcommandConfig,
   SubcommandExecuteFunction,
   SubcommandOption,
 } from "@/types/command";
 
+function omitUndefined(value: SerializedOption): SerializedOption {
+  const out: SerializedOption = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry !== undefined) out[key] = entry;
+  }
+  return out;
+}
+
+function serializeOption(option: CommandOption): SerializedOption {
+  return omitUndefined({
+    name: option.name,
+    description: option.description,
+    type: option.type,
+    required: option.required,
+    choices: option.choices,
+    autocomplete: option.autocomplete,
+    min_value: option.minValue,
+    max_value: option.maxValue,
+    min_length: option.minLength,
+    max_length: option.maxLength,
+    name_localizations: option.nameLocalizations,
+    description_localizations: option.descriptionLocalizations,
+  });
+}
+
+function serializeOptions(options: readonly CommandOption[] | undefined): SerializedOption[] {
+  return (options ?? []).map(serializeOption);
+}
+
+function serializeSubcommand(
+  sub: SubcommandOption & { execute: SubcommandExecuteFunction<any> },
+): SerializedOption {
+  return omitUndefined({
+    name: sub.name,
+    description: sub.description,
+    type: sub.type,
+    options: serializeOptions(sub.options),
+    name_localizations: sub.nameLocalizations,
+    description_localizations: sub.descriptionLocalizations,
+  });
+}
+
 class CommandBuilder<TOptions extends readonly CommandOption[] = []> {
   private config: CommandConfig<TOptions>;
   private executeHandler?: CommandExecuteFunction<TOptions>;
+  private autocompleteHandlers: AutocompleteHandlerMap = {};
 
   constructor(config: CommandConfig<TOptions>) {
     this.config = {
@@ -44,7 +91,16 @@ class CommandBuilder<TOptions extends readonly CommandOption[] = []> {
     if (this.executeHandler) {
       newBuilder.executeHandler = this.executeHandler as any;
     }
+    newBuilder.autocompleteHandlers = { ...this.autocompleteHandlers };
     return newBuilder;
+  }
+
+  autocomplete<TName extends TOptions[number]["name"]>(
+    name: TName,
+    resolver: AutocompleteResolver<TOptions>,
+  ): CommandBuilder<TOptions> {
+    this.autocompleteHandlers[name as string] = resolver as AutocompleteResolver<any>;
+    return this;
   }
 
   execute(handler: CommandExecuteFunction<TOptions>): Command<TOptions> {
@@ -94,20 +150,29 @@ class CommandBuilder<TOptions extends readonly CommandOption[] = []> {
       userPermissions: this.config.userPermissions ?? [],
       enabled: this.config.enabled ?? true,
       options: this.config.options || ([] as any),
+      autocomplete: this.autocompleteHandlers,
       execute: wrappedExecute,
-      toJSON: () => ({
-        name: this.config.name,
-        description: this.config.description,
-        options: this.config.options || ([] as any),
-      }),
+      toJSON: () =>
+        omitUndefined({
+          name: this.config.name,
+          description: this.config.description,
+          options: serializeOptions(this.config.options),
+          name_localizations: this.config.nameLocalizations,
+          description_localizations: this.config.descriptionLocalizations,
+        }) as ReturnType<Command<TOptions>["toJSON"]>,
     };
   }
 }
 
 class SubcommandBuilder {
   private config: BaseCommandConfig;
-  private subcommands: Map<string, SubcommandOption & { execute: SubcommandExecuteFunction<any> }> =
-    new Map();
+  private subcommands: Map<
+    string,
+    SubcommandOption & {
+      execute: SubcommandExecuteFunction<any>;
+      autocomplete?: AutocompleteHandlerMap;
+    }
+  > = new Map();
 
   constructor(config: BaseCommandConfig) {
     this.config = config;
@@ -116,6 +181,7 @@ class SubcommandBuilder {
   subcommand<TOptions extends readonly CommandOption[]>(
     config: SubcommandConfig<TOptions>,
     execute: SubcommandExecuteFunction<TOptions>,
+    autocomplete?: AutocompleteHandlers<TOptions>,
   ): this {
     const getOptionValue = (interaction: ChatInputCommandInteraction, option: CommandOption) => {
       const value = interaction.options.get(option.name);
@@ -156,7 +222,10 @@ class SubcommandBuilder {
       description: config.description,
       type: 1,
       options: config.options as any,
+      nameLocalizations: config.nameLocalizations,
+      descriptionLocalizations: config.descriptionLocalizations,
       execute: wrappedExecute,
+      autocomplete: autocomplete as AutocompleteHandlerMap | undefined,
     });
 
     return this;
@@ -185,16 +254,14 @@ class SubcommandBuilder {
       enabled: this.config.enabled ?? true,
       subcommands: Object.fromEntries(this.subcommands),
       execute: mainExecute,
-      toJSON: () => ({
-        name: this.config.name,
-        description: this.config.description,
-        options: Array.from(this.subcommands.values()).map((sub) => ({
-          name: sub.name,
-          description: sub.description,
-          type: sub.type,
-          options: sub.options,
-        })),
-      }),
+      toJSON: () =>
+        omitUndefined({
+          name: this.config.name,
+          description: this.config.description,
+          options: Array.from(this.subcommands.values()).map(serializeSubcommand),
+          name_localizations: this.config.nameLocalizations,
+          description_localizations: this.config.descriptionLocalizations,
+        }) as ReturnType<CommandWithSubcommands["toJSON"]>,
     };
   }
 }
