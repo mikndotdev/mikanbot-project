@@ -502,7 +502,12 @@ export function stopMarkerFor(
   return index === progress.currentIndex ? STOPPED_MARKER : "";
 }
 
-function formatStop(stop: NormalizedStop, badge: string): string {
+interface StopLineOptions {
+  faded?: boolean;
+  isDestination?: boolean;
+}
+
+function formatStop(stop: NormalizedStop, badge: string, options: StopLineOptions = {}): string {
   const marker = badge ? `${badge} ` : "　";
   if (stop.isPass) {
     return `-# ${marker}${stop.station}　${stop.arrText || stop.depText} 通過`;
@@ -511,7 +516,12 @@ function formatStop(stop: NormalizedStop, badge: string): string {
   if (stop.arrText) times.push(`${stop.arrText} 着`);
   if (stop.depText) times.push(`${stop.depText} 発`);
   const platform = stop.bansen ? `　${stop.bansen}番線` : "";
-  return `${marker}**${stop.station}**　${times.join(" / ") || "－"}${platform}`;
+  const tag = options.isDestination ? `　(降車駅)` : "";
+  if (options.faded) {
+    return `-# ${marker}${stop.station}　${times.join(" / ") || "－"}${platform}`;
+  }
+  const name = options.isDestination ? `**${stop.station}**${tag}` : `**${stop.station}**`;
+  return `${marker}${name}　${times.join(" / ") || "－"}${platform}`;
 }
 
 export function pageCount(stops: NormalizedStop[]): number {
@@ -579,13 +589,15 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const fullStops = normalizeStops(mergeTimetables(detail.timetable_list));
   const { stops, scoped } = scopeToDestination(fullStops, destination);
   const progress = deriveProgress(stops, day.minutes);
-  const totalPages = pageCount(stops);
+  const fullProgress = scoped ? deriveProgress(fullStops, day.minutes) : progress;
+  const destinationIndex = scoped ? stops.length - 1 : -1;
+  const totalPages = pageCount(fullStops);
 
   const isLive = Boolean(
     positions?.train_position?.some((t) => Number(t.retsuban_id) === state.retsubanId),
   );
   const runningToday = runsOnDate(detail, day.selectDate);
-  const page = resolvePage(state.page, stops, progress, runningToday);
+  const page = resolvePage(state.page, fullStops, fullProgress, runningToday);
 
   const alighted = scoped && progress.status === "arrived";
 
@@ -655,14 +667,16 @@ export function buildTrainMessage(args: BuildTrainArgs) {
     );
 
     const offset = page * STOPS_PER_PAGE;
-    const slice = stops.slice(offset, offset + STOPS_PER_PAGE);
-    const stopLines = slice.map((stop, i) =>
-      formatStop(stop, stopMarkerFor(offset + i, progress, runningToday)),
-    );
-    const stopCount = stops.filter((stop) => !stop.isPass).length;
-    const stopsHeading = scoped
-      ? `**停車駅** (${page + 1}/${totalPages}・降車まで${stopCount}駅)`
-      : `**停車駅** (${page + 1}/${totalPages}・全${stopCount}駅)`;
+    const slice = fullStops.slice(offset, offset + STOPS_PER_PAGE);
+    const stopLines = slice.map((stop, i) => {
+      const index = offset + i;
+      return formatStop(stop, stopMarkerFor(index, fullProgress, runningToday), {
+        faded: destinationIndex >= 0 && index > destinationIndex,
+        isDestination: index === destinationIndex,
+      });
+    });
+    const stopCount = fullStops.filter((stop) => !stop.isPass).length;
+    const stopsHeading = `**停車駅** (${page + 1}/${totalPages}・全${stopCount}駅)`;
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent([stopsHeading, stopLines.join("\n") || "－"].join("\n")),
     );

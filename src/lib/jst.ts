@@ -75,3 +75,11 @@ export function parseClockToMinutes(value: string | null | undefined): number | 
   if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
   return hour * 60 + minute;
 }
+
+export function operationalMinutesToUnix(selectDate: string, minutes: number): number | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(selectDate);
+  if (!match || !Number.isFinite(minutes)) return null;
+  const midnightJst =
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) - JST_OFFSET_MS;
+  return Math.floor((midnightJst + minutes * 60_000) / 1000);
+}
