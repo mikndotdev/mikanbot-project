@@ -263,6 +263,10 @@ const WINDOW_SIZE = 4;
 
 export const SHINKANSEN_MARKER = "<:shinkansen_icon:1548009167980204062>";
 export const TRAIN_MARKER = "🚃";
+export const STOPPED_MARKER = "<a:stopped:1548528795059757086>";
+export const PROGRESS_MARKER = "<a:progress_arrows:1548527738279690295>";
+const PASSED_SEPARATOR = " ━━ ";
+const UPCOMING_SEPARATOR = " → ";
 
 export function buildStationWindow(
   stops: NormalizedStop[],
@@ -281,9 +285,9 @@ export function buildStationWindow(
     const global = start + index;
     const isCurrent = global === progress.currentIndex;
     parts.push(isCurrent && atStation ? `${marker}${stop.station}` : stop.station);
-    if (index < win.length - 1) {
-      parts.push(isCurrent && !atStation ? ` ${marker} ` : " ━━ ");
-    }
+    if (index === win.length - 1) return;
+    if (isCurrent && !atStation) parts.push(` ${marker} `);
+    else parts.push(global < progress.currentIndex ? PASSED_SEPARATOR : UPCOMING_SEPARATOR);
   });
 
   return parts.join("");
@@ -456,8 +460,20 @@ export function buildNoticeMessage(text: string) {
   };
 }
 
-function formatStop(stop: NormalizedStop, isCurrent: boolean): string {
-  const marker = isCurrent ? "▶ " : "　";
+export function stopMarkerFor(
+  index: number,
+  progress: TrainProgress,
+  runningToday: boolean,
+): string {
+  if (!runningToday || progress.status === "unknown") return "";
+  if (progress.status === "moving") {
+    return index === progress.currentIndex + 1 ? PROGRESS_MARKER : "";
+  }
+  return index === progress.currentIndex ? STOPPED_MARKER : "";
+}
+
+function formatStop(stop: NormalizedStop, badge: string): string {
+  const marker = badge ? `${badge} ` : "　";
   if (stop.isPass) {
     return `-# ${marker}${stop.station}　${stop.arrText || stop.depText} 通過`;
   }
@@ -577,7 +593,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
     const offset = page * STOPS_PER_PAGE;
     const slice = stops.slice(offset, offset + STOPS_PER_PAGE);
     const stopLines = slice.map((stop, i) =>
-      formatStop(stop, offset + i === progress.currentIndex && progress.status !== "before"),
+      formatStop(stop, stopMarkerFor(offset + i, progress, runningToday)),
     );
     const stopCount = stops.filter((stop) => !stop.isPass).length;
     const stopsHeading = `**停車駅** (${page + 1}/${totalPages}・全${stopCount}駅)`;
