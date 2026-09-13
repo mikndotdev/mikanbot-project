@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { normalizeQuery } from "@/commands/train/shared";
 import { EMOJI } from "@/lib/emojis";
 import { getHenseiNameList, getSlimDiagram, resolveOperationalContext } from "@/lib/elesite";
 import { formatHhmm, getOperationalDay } from "@/lib/jst";
@@ -23,9 +24,9 @@ const vehicleOptions = [
   },
   {
     name: "vehicle",
-    description: "編成を選択してください",
+    description: "路線を選択してから編成を選択してください",
     nameLocalizations: { ja: "編成" },
-    descriptionLocalizations: { ja: "編成を選択してください" },
+    descriptionLocalizations: { ja: "路線を選択してから編成を選択してください" },
     type: ApplicationCommandOptionType.String,
     required: true,
     autocomplete: true,
@@ -43,11 +44,11 @@ export const vehicleAutocomplete: AutocompleteHandlers<typeof vehicleOptions> = 
   line: (_interaction, ctx) => searchLines(ctx.value),
   vehicle: async (_interaction, ctx) => {
     const line = ctx.options.line;
-    if (!isKnownLine(line)) return [{ name: "先に路線を選択してください", value: "-" }];
+    if (!isKnownLine(line)) return [];
 
     const day = getOperationalDay();
     const list = (await getHenseiNameList(line, day.selectDate)) ?? [];
-    const query = ctx.value.trim().toLowerCase();
+    const query = normalizeQuery(ctx.value);
 
     const seen = new Set<string>();
     const hits: AutocompleteChoice[] = [];
@@ -59,7 +60,7 @@ export const vehicleAutocomplete: AutocompleteHandlers<typeof vehicleOptions> = 
       hits.push({ name, value: name });
       if (hits.length >= 25) break;
     }
-    return hits.length > 0 ? hits : [{ name: "編成が見つかりません", value: "-" }];
+    return hits;
   },
 };
 

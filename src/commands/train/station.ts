@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { normalizeQuery } from "@/commands/train/shared";
 import { EMOJI } from "@/lib/emojis";
 import { getStationTimetable, resolveOperationalContext } from "@/lib/elesite";
 import type { ElesiteStationTimetableEntry } from "@/lib/elesite";
@@ -26,9 +27,9 @@ const stationOptions = [
   },
   {
     name: "station",
-    description: "駅を選択してください",
+    description: "路線を選択してから駅を選択してください",
     nameLocalizations: { ja: "駅" },
-    descriptionLocalizations: { ja: "駅を選択してください" },
+    descriptionLocalizations: { ja: "路線を選択してから駅を選択してください" },
     type: ApplicationCommandOptionType.String,
     required: true,
     autocomplete: true,
@@ -56,9 +57,9 @@ export const stationAutocomplete: AutocompleteHandlers<typeof stationOptions> = 
   line: (_interaction, ctx) => searchLines(ctx.value),
   station: (_interaction, ctx) => {
     const line = ctx.options.line;
-    if (!isKnownLine(line)) return [{ name: "先に路線を選択してください", value: "-" }];
-    const hits = searchStationsOnLine(line, ctx.value);
-    return hits.length > 0 ? hits : [{ name: "該当する駅がありません", value: "-" }];
+    if (!isKnownLine(line)) return [];
+    const hits = searchStationsOnLine(line, normalizeQuery(ctx.value));
+    return hits;
   },
 };
 

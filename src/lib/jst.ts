@@ -57,7 +57,7 @@ export function secondsUntilOperationalDayEnd(now: Date = new Date()): number {
 }
 
 export function formatHhmm(value: number | null | undefined): string {
-  if (typeof value !== "number" || !Number.isFinite(value)) return "--:--";
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return "--:--";
   return `${pad(Math.floor(value / 100))}:${pad(value % 100)}`;
 }
 

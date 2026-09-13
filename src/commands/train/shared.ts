@@ -7,6 +7,10 @@ import type { TrainAssignment } from "@/lib/train-assignment";
 import type { AutocompleteChoice, AutocompleteHandlers } from "@/types/command";
 
 export const SENTINEL = "-";
+
+export function normalizeQuery(value: string): string {
+  return value.replace(/^-+/, "").trim().toLowerCase();
+}
 const DIAGRAM_BUDGET_MS = 1200;
 const MAX_CHOICES = 25;
 
@@ -22,9 +26,9 @@ export const trainOptions = [
   },
   {
     name: "train",
-    description: "列車番号・種別・行先で検索できます",
+    description: "路線を選択してから、列車番号・種別・行先で検索できます",
     nameLocalizations: { ja: "列車" },
-    descriptionLocalizations: { ja: "列車番号・種別・行先で検索できます" },
+    descriptionLocalizations: { ja: "路線を選択してから、列車番号・種別・行先で検索できます" },
     type: ApplicationCommandOptionType.String,
     required: true,
     autocomplete: true,
@@ -51,7 +55,7 @@ export function trainChoiceLabel(train: ElesiteSlimTrain): string {
 async function suggestTrains(rosenCode: string, query: string): Promise<AutocompleteChoice[]> {
   const context = await resolveOperationalContext(rosenCode);
   if (!context) {
-    return [{ name: "この路線のダイヤ情報を取得できませんでした", value: SENTINEL }];
+    return [];
   }
 
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -66,12 +70,12 @@ async function suggestTrains(rosenCode: string, query: string): Promise<Autocomp
     return [{ name: "⏳ ダイヤを読み込み中… もう一度入力してください", value: SENTINEL }];
   }
   if (!diagram || diagram.trains.length === 0) {
-    return [{ name: "この路線の列車が見つかりませんでした", value: SENTINEL }];
+    return [];
   }
 
   const day = getOperationalDay();
   const nowHhmm = day.hour * 100 + day.minute;
-  const normalized = query.trim().toLowerCase();
+  const normalized = normalizeQuery(query);
 
   const hits = diagram.trains.filter((train) => matches(train, normalized));
   hits.sort((a, b) => {
@@ -92,7 +96,7 @@ export const trainAutocomplete: AutocompleteHandlers<typeof trainOptions> = {
   train: async (_interaction, ctx) => {
     const line = ctx.options.line;
     if (!isKnownLine(line)) {
-      return [{ name: "先に路線を選択してください", value: SENTINEL }];
+      return [];
     }
     return suggestTrains(line, ctx.value);
   },

@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { normalizeQuery } from "@/commands/train/shared";
 import { getFormationList, getHenseiTable } from "@/lib/elesite";
 import type { ElesiteCarEntry } from "@/lib/elesite";
 import { isKnownLine, lineLabel, searchLines } from "@/lib/train-lines";
@@ -24,9 +25,9 @@ const formationOptions = [
   },
   {
     name: "formation",
-    description: "形式を選択してください",
+    description: "路線を選択してから形式を選択してください",
     nameLocalizations: { ja: "形式" },
-    descriptionLocalizations: { ja: "形式を選択してください" },
+    descriptionLocalizations: { ja: "路線を選択してから形式を選択してください" },
     type: ApplicationCommandOptionType.String,
     required: true,
     autocomplete: true,
@@ -44,11 +45,11 @@ export const formationAutocomplete: AutocompleteHandlers<typeof formationOptions
   line: (_interaction, ctx) => searchLines(ctx.value),
   formation: async (_interaction, ctx) => {
     const line = ctx.options.line;
-    if (!isKnownLine(line)) return [{ name: "先に路線を選択してください", value: "-" }];
+    if (!isKnownLine(line)) return [];
     const list = (await getFormationList(line)) ?? [];
-    const query = ctx.value.trim().toLowerCase();
+    const query = normalizeQuery(ctx.value);
     const hits = list.filter((f) => !query || f.toLowerCase().includes(query));
-    if (hits.length === 0) return [{ name: "形式が見つかりません", value: "-" }];
+    if (hits.length === 0) return [];
     return hits.slice(0, 25).map((f): AutocompleteChoice => ({ name: f, value: f }));
   },
 };
