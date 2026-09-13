@@ -1,5 +1,5 @@
 import { lineLabel } from "@/lib/train-lines";
-import { buildLoadingMessage, buildNoticeMessage, renderTrainView } from "@/lib/train";
+import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import { parseSelection, trainAutocomplete, trainOptions } from "@/commands/train/shared";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 
@@ -24,7 +24,12 @@ export const findExecute: SubcommandExecuteFunction<typeof trainOptions> = async
   await interaction.reply(buildLoadingMessage(lineLabel(selection.rosenCode)));
 
   try {
-    const message = await renderTrainView({ ...selection, page: 0, expanded: false, map: "off" });
+    const message = await renderTrainView({
+      ...selection,
+      page: AUTO_PAGE,
+      expanded: false,
+      map: "off",
+    });
     await interaction.editReply(message);
   } catch {
     await interaction.editReply(

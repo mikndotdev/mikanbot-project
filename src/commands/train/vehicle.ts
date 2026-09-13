@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType } from "discord.js";
 import { getHenseiNameList, getSlimDiagram, resolveOperationalContext } from "@/lib/elesite";
 import { formatHhmm, getOperationalDay } from "@/lib/jst";
 import { isKnownLine, lineLabel, searchLines, stripRouteTag } from "@/lib/train-lines";
-import { buildLoadingMessage, buildNoticeMessage, renderTrainView } from "@/lib/train";
+import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import type {
   AutocompleteChoice,
   AutocompleteHandlers,
@@ -122,7 +122,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
   const message = await renderTrainView({
     rosenCode,
     retsubanId: target.id,
-    page: 0,
+    page: AUTO_PAGE,
     expanded: false,
     map: "off",
   });

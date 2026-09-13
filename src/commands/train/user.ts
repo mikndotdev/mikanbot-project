@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType } from "discord.js";
 import { getAssignment } from "@/lib/train-assignment";
 import { lineLabel } from "@/lib/train-lines";
-import { buildLoadingMessage, buildNoticeMessage, renderTrainView } from "@/lib/train";
+import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 
 const userOptions = [
@@ -51,7 +51,7 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
       {
         rosenCode: assignment.rosenCode,
         retsubanId: assignment.retsubanId,
-        page: 0,
+        page: AUTO_PAGE,
         expanded: false,
         map: "off",
       },

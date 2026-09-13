@@ -1,6 +1,6 @@
 import { getAssignment } from "@/lib/train-assignment";
 import { lineLabel } from "@/lib/train-lines";
-import { buildLoadingMessage, buildNoticeMessage, renderTrainView } from "@/lib/train";
+import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 
 const meOptions = [] as const;
@@ -34,7 +34,7 @@ export const meExecute: SubcommandExecuteFunction<typeof meOptions> = async (int
       {
         rosenCode: assignment.rosenCode,
         retsubanId: assignment.retsubanId,
-        page: 0,
+        page: AUTO_PAGE,
         expanded: false,
         map: "off",
       },

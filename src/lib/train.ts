@@ -494,6 +494,20 @@ export function clampPage(page: number, stops: NormalizedStop[]): number {
   return Math.min(Math.max(0, Math.trunc(page)), total - 1);
 }
 
+export const AUTO_PAGE = -1;
+
+export function resolvePage(
+  page: number,
+  stops: NormalizedStop[],
+  progress: TrainProgress,
+  runningToday: boolean,
+): number {
+  if (Number.isFinite(page) && page >= 0) return clampPage(page, stops);
+  if (!runningToday || progress.status === "unknown") return 0;
+  const target = progress.status === "moving" ? progress.currentIndex + 1 : progress.currentIndex;
+  return clampPage(Math.floor(target / STOPS_PER_PAGE), stops);
+}
+
 export interface TrainOwner {
   displayName: string;
   isSelf: boolean;
@@ -523,13 +537,13 @@ export function buildTrainMessage(args: BuildTrainArgs) {
 
   const stops = normalizeStops(mergeTimetables(detail.timetable_list));
   const progress = deriveProgress(stops, day.minutes);
-  const page = clampPage(state.page, stops);
   const totalPages = pageCount(stops);
 
   const isLive = Boolean(
     positions?.train_position?.some((t) => Number(t.retsuban_id) === state.retsubanId),
   );
   const runningToday = runsOnDate(detail, day.selectDate);
+  const page = resolvePage(state.page, stops, progress, runningToday);
 
   let statusBadge: string;
   if (!runningToday) statusBadge = "⚫ 本日運休";
