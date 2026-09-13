@@ -65,6 +65,10 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
       )
       .setColor("#FF0000")
       .setTimestamp();
-    await interaction.reply({ embeds: [errorEmbed], flags: "Ephemeral" });
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ embeds: [errorEmbed] });
+    } else {
+      await interaction.reply({ embeds: [errorEmbed], flags: "Ephemeral" });
+    }
   }
 }

@@ -1,4 +1,9 @@
-import { ApplicationCommandType, type ChatInputCommandInteraction } from "discord.js";
+import {
+  ApplicationCommandType,
+  ApplicationIntegrationType,
+  InteractionContextType,
+  type ChatInputCommandInteraction,
+} from "discord.js";
 import type {
   AutocompleteHandlerMap,
   AutocompleteHandlers,
@@ -14,11 +19,31 @@ import type {
   MessageCommand,
   MessageCommandConfig,
   MessageCommandExecuteFunction,
+  InstallFields,
   SerializedOption,
   SubcommandConfig,
   SubcommandExecuteFunction,
   SubcommandOption,
 } from "@/types/command";
+
+function installFields(userInstallable?: boolean): InstallFields {
+  return userInstallable
+    ? {
+        integration_types: [
+          ApplicationIntegrationType.GuildInstall,
+          ApplicationIntegrationType.UserInstall,
+        ],
+        contexts: [
+          InteractionContextType.Guild,
+          InteractionContextType.BotDM,
+          InteractionContextType.PrivateChannel,
+        ],
+      }
+    : {
+        integration_types: [ApplicationIntegrationType.GuildInstall],
+        contexts: [InteractionContextType.Guild],
+      };
+}
 
 function omitUndefined(value: SerializedOption): SerializedOption {
   const out: SerializedOption = {};
@@ -160,6 +185,7 @@ class CommandBuilder<TOptions extends readonly CommandOption[] = []> {
           options: serializeOptions(this.config.options),
           name_localizations: this.config.nameLocalizations,
           description_localizations: this.config.descriptionLocalizations,
+          ...installFields(this.config.userInstallable),
         }) as ReturnType<Command<TOptions>["toJSON"]>,
     };
   }
@@ -262,6 +288,7 @@ class SubcommandBuilder {
           options: Array.from(this.subcommands.values()).map(serializeSubcommand),
           name_localizations: this.config.nameLocalizations,
           description_localizations: this.config.descriptionLocalizations,
+          ...installFields(this.config.userInstallable),
         }) as ReturnType<CommandWithSubcommands["toJSON"]>,
     };
   }
@@ -293,6 +320,7 @@ export function createMessageCommand(
     toJSON: () => ({
       name: config.name,
       type: ApplicationCommandType.Message,
+      ...installFields(config.userInstallable),
     }),
   };
 }

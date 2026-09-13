@@ -2,13 +2,18 @@ import { PermissionFlagsBits, type ButtonInteraction } from "discord.js";
 import { EMOJI } from "@/lib/emojis";
 import { lineLabel } from "@/lib/train-lines";
 import { listSubscriptions, removeSubscription } from "@/lib/train-subscriptions";
-import { buildSubscriptionList, decodeSubId } from "@/commands/train/list-subscriptions";
+import { buildSubscriptionList, decodeSubId } from "@/commands/trainconfig/list";
 
 export async function handleTrainSubComponent(interaction: ButtonInteraction) {
   const decoded = decodeSubId(interaction.customId);
   if (!decoded) return;
 
-  if (!interaction.inCachedGuild()) return;
+  if (!interaction.inCachedGuild()) {
+    return interaction.reply({
+      content: `${EMOJI.error} この操作はサーバー内でのみ使用できます。`,
+      flags: "Ephemeral",
+    });
+  }
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageChannels)) {
     return interaction.reply({

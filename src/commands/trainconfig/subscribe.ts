@@ -29,18 +29,18 @@ const subscribeOptions = [
   },
 ] as const;
 
-export const statusSubscribeConfig: SubcommandConfig<typeof subscribeOptions> = {
-  name: "status-subscribe",
+export const subscribeConfig: SubcommandConfig<typeof subscribeOptions> = {
+  name: "subscribe",
   description: "チャンネルを路線の運行情報に登録します",
   descriptionLocalizations: { ja: "チャンネルを路線の運行情報に登録します" },
   options: subscribeOptions,
 };
 
-export const statusSubscribeAutocomplete: AutocompleteHandlers<typeof subscribeOptions> = {
+export const subscribeAutocomplete: AutocompleteHandlers<typeof subscribeOptions> = {
   line: (_interaction, ctx) => searchLines(ctx.value),
 };
 
-export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeOptions> = async (
+export const subscribeExecute: SubcommandExecuteFunction<typeof subscribeOptions> = async (
   interaction,
   options,
 ) => {
@@ -103,7 +103,7 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
   }
   if (result === "limit") {
     return interaction.reply({
-      content: `${EMOJI.error} 1サーバーあたり ${MAX_LINES_PER_GUILD} 路線までです。\`/train list-subscriptions\` で整理してください。`,
+      content: `${EMOJI.error} 1サーバーあたり ${MAX_LINES_PER_GUILD} 路線までです。\`/trainconfig list\` で整理してください。`,
       flags: "Ephemeral",
     });
   }

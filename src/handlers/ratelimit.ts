@@ -19,11 +19,8 @@ export async function setCommandRatelimit(
   name: string,
 ) {
   if (type !== "cmd") return;
-  await cacheSet(
-    `command:${interaction.guildId}:${interaction.user.id}:${name}`,
-    `${interaction.guildId}`,
-    time,
-  );
+  const scope = interaction.guildId ?? "dm";
+  await cacheSet(`command:${scope}:${interaction.user.id}:${name}`, scope, time);
 }
 
 export async function checkCommandRatelimit(
@@ -32,8 +29,9 @@ export async function checkCommandRatelimit(
   name: string,
 ) {
   if (type !== "cmd") return false;
-  const isLimited = await cacheGet(`command:${interaction.guildId}:${interaction.user.id}:${name}`);
-  return isLimited === `${interaction.guildId}`;
+  const scope = interaction.guildId ?? "dm";
+  const isLimited = await cacheGet(`command:${scope}:${interaction.user.id}:${name}`);
+  return isLimited === scope;
 }
 
 export async function setTranslationRatelimit(type: string, user: string, time: number) {

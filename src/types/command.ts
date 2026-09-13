@@ -1,6 +1,8 @@
 import type {
   ApplicationCommandOptionType,
   ApplicationCommandType,
+  ApplicationIntegrationType,
+  InteractionContextType,
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   MessageContextMenuCommandInteraction,
@@ -123,6 +125,7 @@ export interface BaseCommandConfig {
   botPermissions?: PermissionResolvable[];
   userPermissions?: PermissionResolvable[];
   enabled?: boolean;
+  userInstallable?: boolean;
 }
 
 export interface CommandConfig<
@@ -157,6 +160,8 @@ export interface Command<TOptions extends readonly CommandOption[] = []> {
     options: SerializedOption[];
     name_localizations?: Record<string, string>;
     description_localizations?: Record<string, string>;
+    integration_types: ApplicationIntegrationType[];
+    contexts: InteractionContextType[];
   };
 }
 
@@ -183,6 +188,8 @@ export interface CommandWithSubcommands {
     options: SerializedOption[];
     name_localizations?: Record<string, string>;
     description_localizations?: Record<string, string>;
+    integration_types: ApplicationIntegrationType[];
+    contexts: InteractionContextType[];
   };
 }
 
@@ -194,6 +201,12 @@ export interface MessageCommandConfig {
   botPermissions?: PermissionResolvable[];
   userPermissions?: PermissionResolvable[];
   enabled?: boolean;
+  userInstallable?: boolean;
+}
+
+export interface InstallFields {
+  integration_types: ApplicationIntegrationType[];
+  contexts: InteractionContextType[];
 }
 
 export type MessageCommandExecuteFunction = (
@@ -212,5 +225,7 @@ export interface MessageCommand {
   toJSON: () => {
     name: string;
     type: ApplicationCommandType.Message;
+    integration_types: ApplicationIntegrationType[];
+    contexts: InteractionContextType[];
   };
 }

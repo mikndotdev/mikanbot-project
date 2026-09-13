@@ -8,6 +8,7 @@ const currencyToName = async (code: string) => {
 
 export const currency = createCommand({
   name: "currency",
+  userInstallable: true,
   description: "Convert between various currencies",
   cooldown: 3,
   isPremium: false,

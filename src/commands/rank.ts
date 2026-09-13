@@ -36,6 +36,13 @@ export const rank = createCommand({
   cooldown: 3,
   isPremium: false,
 }).execute(async (interaction) => {
+  if (!interaction.guild) {
+    return interaction.reply({
+      content: "This command can only be used in a server!",
+      flags: "Ephemeral",
+    });
+  }
+
   const username = interaction.user.displayName;
   const avatar = `${interaction.user.displayAvatarURL()}?size=1024"`;
   const guildDB = await prisma.server.findUnique({

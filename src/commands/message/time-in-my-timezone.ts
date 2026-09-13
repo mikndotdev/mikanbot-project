@@ -3,7 +3,7 @@ import { createMessageCommand } from "@/lib/command-builder";
 import { extractTime } from "@/lib/get-timezone";
 
 export const timeInMyTimezone = createMessageCommand(
-  { name: "Time in my timezone", cooldown: 5 },
+  { name: "Time in my timezone", userInstallable: true, cooldown: 5 },
   async (interaction) => {
     await interaction.deferReply({ flags: "Ephemeral" });
 

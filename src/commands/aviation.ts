@@ -4,6 +4,7 @@ import { planeConfig, planeExecute } from "@/commands/aviation/plane";
 
 export const aviation = createCommandWithSubcommands({
   name: "aviation",
+  userInstallable: true,
   description: "Flight and aircraft information",
   cooldown: 10,
 })

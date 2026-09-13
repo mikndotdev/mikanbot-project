@@ -3,7 +3,7 @@ import { createMessageCommand } from "@/lib/command-builder";
 import { collectImageSources, convertImageToGif } from "@/lib/gif";
 
 export const convertToGif = createMessageCommand(
-  { name: "Convert to GIF", cooldown: 15, premiumCooldown: 5 },
+  { name: "Convert to GIF", userInstallable: true, cooldown: 15, premiumCooldown: 5 },
   async (interaction) => {
     await interaction.deferReply({ flags: "Ephemeral" });
 

@@ -3,6 +3,7 @@ import { EMOJI } from "@/lib/emojis";
 
 export const ping = createCommand({
   name: "ping",
+  userInstallable: true,
   description: "Replies with Pong!",
   cooldown: 5,
   isPremium: false,

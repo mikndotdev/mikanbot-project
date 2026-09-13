@@ -22,8 +22,8 @@ const ACCENT = 0xff7700;
 
 const listOptions = [] as const;
 
-export const listSubscriptionsConfig: SubcommandConfig<typeof listOptions> = {
-  name: "list-subscriptions",
+export const listConfig: SubcommandConfig<typeof listOptions> = {
+  name: "list",
   description: "このサーバーの運行情報の登録一覧を表示します",
   descriptionLocalizations: { ja: "このサーバーの運行情報の登録一覧を表示します" },
   options: listOptions,
@@ -64,7 +64,7 @@ export function buildSubscriptionList(subs: TrainSubscription[], page = 0) {
   if (subs.length === 0) {
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        `## ${EMOJI.headingTrain} 運行情報の登録\n登録されているチャンネルはありません。\n-# \`/train status-subscribe\` で登録できます。`,
+        `## ${EMOJI.headingTrain} 運行情報の登録\n登録されているチャンネルはありません。\n-# \`/trainconfig subscribe\` で登録できます。`,
       ),
     );
     return {
@@ -131,9 +131,7 @@ export function buildSubscriptionList(subs: TrainSubscription[], page = 0) {
   };
 }
 
-export const listSubscriptionsExecute: SubcommandExecuteFunction<typeof listOptions> = async (
-  interaction,
-) => {
+export const listExecute: SubcommandExecuteFunction<typeof listOptions> = async (interaction) => {
   if (!interaction.inCachedGuild()) {
     return interaction.reply({
       content: "このコマンドはサーバー内でのみ使用できます。",
