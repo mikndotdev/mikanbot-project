@@ -38,8 +38,11 @@ export const meExecute: SubcommandExecuteFunction<typeof meOptions> = async (int
         page: AUTO_PAGE,
         expanded: false,
         map: "off",
+        ownerId: interaction.user.id,
       },
       owner,
+      undefined,
+      assignment.destination,
     );
     await interaction.editReply(message);
   } catch {

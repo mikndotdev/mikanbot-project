@@ -49,14 +49,15 @@ model server {
 }
 
 model trainAssignment {
-  id         String   @id
-  rosenCode  String
-  retsuban   String
-  retsubanId Int
-  shubetsu   String
-  ikisaki    String
-  selectDate String
-  setAt      DateTime @default(now())
+  id          String   @id
+  rosenCode   String
+  retsuban    String
+  retsubanId  Int
+  shubetsu    String
+  ikisaki     String
+  destination String?
+  selectDate  String
+  setAt       DateTime @default(now())
 }
 
 model trainSubscription {

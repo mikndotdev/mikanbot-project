@@ -5,7 +5,7 @@ interface CustomEmoji {
 }
 
 const CUSTOM = {
-  loading: { name: "loading", id: "1272805571585642506", animated: true },
+  loading: { name: "bouncingdots_load", id: "1548545589145378827", animated: true },
   camera: { name: "camera", id: "1316791863172268132", animated: false },
   shinkansen: { name: "shinkansen_icon", id: "1548009167980204062", animated: false },
   stopped: { name: "stopped", id: "1548528795059757086", animated: true },
@@ -55,6 +55,7 @@ export const EMOJI = {
   success: "✅",
   error: "❌",
   owner: "👤",
+  destination: "🚪",
 
   headingTrain: "🚆",
   headingMap: "🗺️",

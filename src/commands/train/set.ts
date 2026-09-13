@@ -1,6 +1,7 @@
 import { lineLabel, stripRouteTag } from "@/lib/train-lines";
 import { EMOJI } from "@/lib/emojis";
 import { setAssignment } from "@/lib/train-assignment";
+import { buildStopPicker, loadStops, pickerPrompt } from "@/lib/train-stop-picker";
 import {
   parseSelection,
   resolveAssignment,
@@ -37,8 +38,12 @@ export const setExecute: SubcommandExecuteFunction<typeof trainOptions> = async 
 
   await setAssignment(interaction.user.id, assignment);
 
+  const label = `${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}`;
+  const stops = await loadStops(assignment.retsubanId);
+
   return interaction.reply({
-    content: `${EMOJI.success} ${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。`,
+    content: `${EMOJI.success} ${label}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。\n\n${pickerPrompt(label)}`,
+    components: stops.length > 1 ? buildStopPicker(assignment.retsubanId, stops) : [],
     flags: "Ephemeral",
   });
 };

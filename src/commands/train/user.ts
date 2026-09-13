@@ -55,8 +55,11 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
         page: AUTO_PAGE,
         expanded: false,
         map: "off",
+        ownerId: target.id,
       },
       owner,
+      undefined,
+      assignment.destination,
     );
     await interaction.editReply(message);
   } catch {

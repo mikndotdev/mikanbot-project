@@ -133,5 +133,6 @@ export async function resolveAssignment(
     retsubanId,
     shubetsu: train.shubetsu,
     ikisaki: train.ikisaki,
+    destination: null,
   };
 }

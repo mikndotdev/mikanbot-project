@@ -7,6 +7,7 @@ export interface TrainAssignment {
   retsubanId: number;
   shubetsu: string;
   ikisaki: string;
+  destination: string | null;
 }
 
 export async function setAssignment(
@@ -55,5 +56,13 @@ export async function getAssignment(
     retsubanId: row.retsubanId,
     shubetsu: row.shubetsu,
     ikisaki: row.ikisaki,
+    destination: row.destination,
   };
+}
+
+export async function setDestination(userId: string, destination: string | null): Promise<boolean> {
+  const existing = await prisma.trainAssignment.findUnique({ where: { id: userId } });
+  if (!existing) return false;
+  await prisma.trainAssignment.update({ where: { id: userId }, data: { destination } });
+  return true;
 }

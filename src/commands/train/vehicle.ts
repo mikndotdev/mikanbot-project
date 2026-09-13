@@ -127,6 +127,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
     page: AUTO_PAGE,
     expanded: false,
     map: "off",
+    ownerId: null,
   });
   return interaction.editReply(message);
 };

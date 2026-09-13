@@ -30,6 +30,7 @@ export const findExecute: SubcommandExecuteFunction<typeof trainOptions> = async
       page: AUTO_PAGE,
       expanded: false,
       map: "off",
+      ownerId: null,
     });
     await interaction.editReply(message);
   } catch {

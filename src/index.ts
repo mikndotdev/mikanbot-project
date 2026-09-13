@@ -13,6 +13,7 @@ import { handleFlightComponent } from "@/handlers/flightComponent";
 import { handlePlaneComponent } from "@/handlers/planeComponent";
 import { handleTrainComponent } from "@/handlers/trainComponent";
 import { handleTrainSubComponent } from "@/handlers/trainSubComponent";
+import { handleTrainStopComponent } from "@/handlers/trainStopComponent";
 import { emojiCountryCode } from "country-code-emoji";
 import { env } from "@/lib/env";
 import * as Sentry from "@sentry/bun";
@@ -179,6 +180,28 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId.startsWith("trainsub:")) {
       try {
         await handleTrainSubComponent(interaction);
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+    }
+    if (interaction.customId.startsWith("trainstop:")) {
+      try {
+        await handleTrainStopComponent(interaction);
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+    }
+  }
+
+  if (interaction.isStringSelectMenu()) {
+    Sentry.logger.info("Received select menu", {
+      customId: interaction.customId,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+    });
+    if (interaction.customId.startsWith("trainstop:")) {
+      try {
+        await handleTrainStopComponent(interaction);
       } catch (e) {
         Sentry.captureException(e);
       }

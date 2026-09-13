@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/bun";
 import {
   ActionRowBuilder,
+  time,
+  TimestampStyles,
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -35,7 +37,12 @@ import type {
   ElesiteTimetableEntry,
   ElesiteTimetableGroup,
 } from "@/lib/elesite";
-import { formatHhmm, getOperationalDay, parseClockToMinutes } from "@/lib/jst";
+import {
+  formatHhmm,
+  getOperationalDay,
+  operationalMinutesToUnix,
+  parseClockToMinutes,
+} from "@/lib/jst";
 import { lineEmoji } from "@/lib/train-logos";
 import { EMOJI } from "@/lib/emojis";
 import { renderTrainMap } from "@/lib/train-map";
@@ -72,18 +79,19 @@ export interface TrainState {
   page: number;
   expanded: boolean;
   map: MapMode;
+  ownerId: string | null;
 }
 
 const MAP_CODES: Record<MapMode, string> = { off: "0", train: "1", line: "2" };
 const MAP_FROM_CODE: Record<string, MapMode> = { "0": "off", "1": "train", "2": "line" };
 
 export function encodeTrainId(action: TrainAction, state: TrainState): string {
-  return `train:${action}:${state.rosenCode}:${state.retsubanId}:${state.page}:${state.expanded ? 1 : 0}:${MAP_CODES[state.map]}`;
+  return `train:${action}:${state.rosenCode}:${state.retsubanId}:${state.page}:${state.expanded ? 1 : 0}:${MAP_CODES[state.map]}:${state.ownerId ?? "-"}`;
 }
 
 export function decodeTrainId(customId: string): { action: TrainAction; state: TrainState } | null {
   const parts = customId.split(":");
-  if (parts.length !== 7 || parts[0] !== "train") return null;
+  if (parts.length !== 8 || parts[0] !== "train") return null;
   const action = parts[1] as TrainAction;
   const known: TrainAction[] = [
     "refresh",
@@ -108,6 +116,7 @@ export function decodeTrainId(customId: string): { action: TrainAction; state: T
       page,
       expanded: parts[5] === "1",
       map: MAP_FROM_CODE[parts[6] ?? "0"] ?? "off",
+      ownerId: parts[7] && parts[7] !== "-" ? parts[7] : null,
     },
   };
 }
@@ -292,6 +301,22 @@ export function buildStationWindow(
   });
 
   return parts.join("");
+}
+
+export function etaSuffix(
+  stops: NormalizedStop[],
+  progress: TrainProgress,
+  selectDate: string,
+): string {
+  if (stops.length === 0) return "";
+  if (progress.status === "arrived" || progress.status === "unknown") return "";
+  const last = stops[stops.length - 1];
+  if (!last) return "";
+  const minutes = last.arrive ?? last.depart;
+  if (minutes === null) return "";
+  const unix = operationalMinutesToUnix(selectDate, minutes);
+  if (unix === null) return "";
+  return `　${last.station} ${time(unix, TimestampStyles.RelativeTime)}`;
 }
 
 export function progressBar(stops: NormalizedStop[], progress: TrainProgress): string {
@@ -513,6 +538,16 @@ export function resolvePage(
   return clampPage(Math.floor(target / STOPS_PER_PAGE), stops);
 }
 
+export function scopeToDestination(
+  stops: NormalizedStop[],
+  destination: string | null | undefined,
+): { stops: NormalizedStop[]; scoped: boolean } {
+  if (!destination) return { stops, scoped: false };
+  const index = stops.findIndex((stop) => stop.station === destination && !stop.isPass);
+  if (index < 0 || index === stops.length - 1) return { stops, scoped: false };
+  return { stops: stops.slice(0, index + 1), scoped: true };
+}
+
 export interface TrainOwner {
   displayName: string;
   isSelf: boolean;
@@ -526,6 +561,7 @@ export interface TrainMapResult {
 export interface BuildTrainArgs {
   state: TrainState;
   owner?: TrainOwner;
+  destination?: string | null;
   unyou?: ElesiteUnyouLeg[] | null;
   map?: TrainMapResult | null;
   detail: ElesiteRetsubanTime;
@@ -536,11 +572,12 @@ export interface BuildTrainArgs {
 }
 
 export function buildTrainMessage(args: BuildTrainArgs) {
-  const { state, detail, positions, railwayInfo, icon, owner, unyou, map } = args;
+  const { state, detail, positions, railwayInfo, icon, owner, unyou, map, destination } = args;
   const now = args.now ?? new Date();
   const day = getOperationalDay(now);
 
-  const stops = normalizeStops(mergeTimetables(detail.timetable_list));
+  const fullStops = normalizeStops(mergeTimetables(detail.timetable_list));
+  const { stops, scoped } = scopeToDestination(fullStops, destination);
   const progress = deriveProgress(stops, day.minutes);
   const totalPages = pageCount(stops);
 
@@ -550,8 +587,11 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const runningToday = runsOnDate(detail, day.selectDate);
   const page = resolvePage(state.page, stops, progress, runningToday);
 
+  const alighted = scoped && progress.status === "arrived";
+
   let statusBadge: string;
   if (!runningToday) statusBadge = `${EMOJI.statusNotRunning} 本日運休`;
+  else if (alighted) statusBadge = `${EMOJI.destination} 下車済み`;
   else if (isLive) statusBadge = `${EMOJI.statusLive} 運行中`;
   else if (progress.status === "before") statusBadge = `${EMOJI.statusBeforeDeparture} 発車前`;
   else if (progress.status === "arrived") statusBadge = `${EMOJI.statusFinished} 運行終了`;
@@ -563,7 +603,8 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const title = `## ${logo ? `${logo} ` : ""}${stripRouteTag(detail.shubetsu)} ${stripRouteTag(detail.retsuban)}`;
   const subtitle = `${lineLabel(state.rosenCode)} ・ ${detail.ikisaki}ゆき`;
   const ownerLine = owner ? `-# ${EMOJI.owner} ${owner.displayName} の列車\n` : "";
-  const header = `${ownerLine}${title}\n${subtitle}`;
+  const destinationLine = scoped ? `\n-# ${EMOJI.destination} 降車駅: ${destination}` : "";
+  const header = `${ownerLine}${title}\n${subtitle}${destinationLine}`;
 
   if (icon) {
     container.addSectionComponents(
@@ -584,17 +625,21 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const severe = (latestRailwayInfo(railwayInfo)?.status ?? 0) >= 2;
   const marker = isShinkansen(state.rosenCode, detail.shubetsu) ? SHINKANSEN_MARKER : TRAIN_MARKER;
   const window = runningToday ? buildStationWindow(stops, progress, marker) : "";
-  const statusLine = `**現在地**　${runningToday ? progress.text : "－"}　${statusBadge}`;
+  const rawBar = progressBar(stops, progress);
+  const barLine =
+    rawBar && runningToday ? `${rawBar}${etaSuffix(stops, progress, day.selectDate)}` : rawBar;
+  const positionText = alighted ? progress.text.replace("到着済み", "下車済み") : progress.text;
+  const statusLine = `**現在地**　${runningToday ? positionText : "－"}　${statusBadge}`;
 
   if (expanded) {
     const formation = detail.hensei_list?.length
       ? `${detail.formation_list?.[0] ?? ""}${detail.hensei_list.join("+")}`
       : (detail.formation_list?.[0] ?? "－");
-    const bar = progressBar(stops, progress);
-
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        [statusLine, bar, window, `**編成**　　${formation || "－"}`].filter(Boolean).join("\n"),
+        [statusLine, barLine, window, `**編成**　　${formation || "－"}`]
+          .filter(Boolean)
+          .join("\n"),
       ),
     );
 
@@ -615,7 +660,9 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       formatStop(stop, stopMarkerFor(offset + i, progress, runningToday)),
     );
     const stopCount = stops.filter((stop) => !stop.isPass).length;
-    const stopsHeading = `**停車駅** (${page + 1}/${totalPages}・全${stopCount}駅)`;
+    const stopsHeading = scoped
+      ? `**停車駅** (${page + 1}/${totalPages}・降車まで${stopCount}駅)`
+      : `**停車駅** (${page + 1}/${totalPages}・全${stopCount}駅)`;
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent([stopsHeading, stopLines.join("\n") || "－"].join("\n")),
     );
@@ -630,7 +677,9 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   } else {
     container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        [statusLine, window, severe && disruption ? disruption : ""].filter(Boolean).join("\n"),
+        [statusLine, barLine, window, severe && disruption ? disruption : ""]
+          .filter(Boolean)
+          .join("\n"),
       ),
     );
   }
@@ -773,6 +822,7 @@ export async function renderTrainView(
   state: TrainState,
   owner?: TrainOwner,
   now: Date = new Date(),
+  destination?: string | null,
 ) {
   const context = await resolveOperationalContext(state.rosenCode, now);
   if (!context) {
@@ -820,6 +870,7 @@ export async function renderTrainView(
   return buildTrainMessage({
     state,
     owner,
+    destination,
     detail,
     positions,
     railwayInfo,
