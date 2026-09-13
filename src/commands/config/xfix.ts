@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 import { prisma } from "@/lib/db";
 
@@ -45,7 +46,7 @@ export const xfixExecute: SubcommandExecuteFunction<typeof xfixOptions> = async 
   });
 
   return interaction.reply({
-    content: `✅ X post embed enhancement ${options.enabled ? "enabled" : "disabled"}`,
+    content: `${EMOJI.success} X post embed enhancement ${options.enabled ? "enabled" : "disabled"}`,
     flags: "Ephemeral",
   });
 };

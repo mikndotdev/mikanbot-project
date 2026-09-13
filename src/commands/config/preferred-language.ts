@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 import { prisma } from "@/lib/db";
 import ISO6391 from "iso-639-1";
@@ -39,7 +40,7 @@ export const preferredLanguageExecute: SubcommandExecuteFunction<
 
   if (languageCode.length !== 2 || !/^[a-z]{2}$/.test(languageCode)) {
     return interaction.reply({
-      content: "❌ Please provide a valid two-letter language code (e.g., en, es, fr)",
+      content: `${EMOJI.error} Please provide a valid two-letter language code (e.g., en, es, fr)`,
       flags: "Ephemeral",
     });
   }
@@ -48,7 +49,7 @@ export const preferredLanguageExecute: SubcommandExecuteFunction<
 
   if (!languageName) {
     return interaction.reply({
-      content: `❌ Invalid language code: ${languageCode}. Please use a valid ISO 639-1 language code (e.g., en, es, fr, de, ja)`,
+      content: `${EMOJI.error} Invalid language code: ${languageCode}. Please use a valid ISO 639-1 language code (e.g., en, es, fr, de, ja)`,
       flags: "Ephemeral",
     });
   }
@@ -63,7 +64,7 @@ export const preferredLanguageExecute: SubcommandExecuteFunction<
   });
 
   return interaction.reply({
-    content: `✅ Preferred language set to ${languageCode} (${languageName})`,
+    content: `${EMOJI.success} Preferred language set to ${languageCode} (${languageName})`,
     flags: "Ephemeral",
   });
 };

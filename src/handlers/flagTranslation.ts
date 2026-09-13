@@ -5,6 +5,7 @@ import { MessageReaction, Message, User, EmbedBuilder } from "discord.js";
 import { setTranslationRatelimit, checkTranslationRatelimit } from "@/handlers/ratelimit";
 import { dmUser } from "@/index";
 import { prisma } from "@/lib/db";
+import { EMOJI } from "@/lib/emojis";
 import { env } from "@/lib/env";
 import countries from "@/countries.json";
 import * as Sentry from "@sentry/bun";
@@ -52,10 +53,10 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
     Sentry.logger.debug("Message content is empty or undefined", { messageId: message.id });
     return;
   }
-  message.react("<a:loading:1272805571585642506>");
+  message.react(EMOJI.loading);
   if (message.attachments.size > 0) {
     if (message.attachments.first()?.contentType?.startsWith("image")) {
-      message.react("<:camera:1316791863172268132>");
+      message.react(EMOJI.camera);
       const attachment = message.attachments.first();
       if (!attachment) return;
       const visionResult = await vision.annotateImage({
@@ -69,12 +70,12 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
       const [image] = visionResult;
       if (!image.textAnnotations || !image.textAnnotations[0]) {
         message.reactions.removeAll();
-        return message.react("❌");
+        return message.react(EMOJI.error);
       }
       const text = image.textAnnotations[0].description;
       if (!text) {
         message.reactions.removeAll();
-        return message.react("❌");
+        return message.react(EMOJI.error);
       }
       const translationResult = await translate.translate(text, language).catch((error) => {
         Sentry.captureException(error, {
@@ -82,7 +83,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
           extra: { language, messageId: message.id, guildId: message.guildId },
         });
         message.reactions.removeAll();
-        message.react("❌");
+        message.react(EMOJI.error);
         return null;
       });
       if (!translationResult) return;
@@ -115,7 +116,7 @@ export async function translateMessage(reaction: MessageReaction, user: User) {
       extra: { language, messageId: message.id, guildId: message.guildId },
     });
     message.reactions.removeAll();
-    message.react("❌");
+    message.react(EMOJI.error);
     return null;
   });
   if (!translationResult) return;

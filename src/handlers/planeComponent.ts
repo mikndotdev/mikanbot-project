@@ -1,4 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { fetchAirlineLogo, fetchFleet, fetchLiveByReg } from "@/lib/airlabs";
 import {
   applyZoom,
@@ -21,7 +22,9 @@ export async function handlePlaneComponent(interaction: ButtonInteraction) {
 
   if (!fleet && !live) {
     await interaction.editReply(
-      buildNoticeMessage(`## ✈️ \`${state.reg}\`\nNo aircraft found for that registration.`),
+      buildNoticeMessage(
+        `## ${EMOJI.headingFlight} \`${state.reg}\`\nNo aircraft found for that registration.`,
+      ),
     );
     return;
   }

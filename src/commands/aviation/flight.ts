@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 import { resolveCallsign } from "@/lib/airlines";
 import { fetchAirlabsFlight, fetchAirlineLogo } from "@/lib/airlabs";
@@ -50,7 +51,7 @@ export const flightExecute: SubcommandExecuteFunction<typeof flightOptions> = as
   if (!live && !airlabs) {
     return interaction.editReply(
       buildNoticeMessage(
-        `## ✈️ \`${callsign}\`\nNo flight found. The flight may not be airborne or tracked right now.`,
+        `## ${EMOJI.headingFlight} \`${callsign}\`\nNo flight found. The flight may not be airborne or tracked right now.`,
       ),
     );
   }

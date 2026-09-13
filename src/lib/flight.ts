@@ -20,6 +20,7 @@ import {
 } from "discord.js";
 import type { AirlabsFleet, AirlabsFlight, AirlabsLive } from "@/lib/airlabs";
 import { resolveAircraftName } from "@/lib/aircraft";
+import { EMOJI } from "@/lib/emojis";
 
 const PIN_URL = "https://cdn.mikn.dev/bot-assets/mikanbot/plane-pin.png";
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -31,7 +32,7 @@ export const ZOOM_MAX = 15;
 export const ZOOM_STEP = 2;
 export const DEFAULT_ZOOM = 8;
 const ACCENT = 0xff7700;
-const LOADING_EMOJI = "<a:loading:1272805571585642506>";
+const LOADING_EMOJI = EMOJI.loading;
 
 export interface Aircraft {
   hex?: string;
@@ -485,7 +486,9 @@ function noticeContainer(text: string): ContainerBuilder {
 export function buildLoadingMessage(label: string) {
   return {
     flags: MessageFlags.IsComponentsV2 as const,
-    components: [noticeContainer(`## ✈️ \`${label}\`\n${LOADING_EMOJI} Fetching data…`)],
+    components: [
+      noticeContainer(`## ${EMOJI.headingFlight} \`${label}\`\n${LOADING_EMOJI} Fetching data…`),
+    ],
   };
 }
 
@@ -520,7 +523,7 @@ export function buildFlightMessage(args: BuildFlightArgs) {
   const container = new ContainerBuilder().setAccentColor(ACCENT);
 
   const subtitle = [reg, type].filter(Boolean).join(" · ") || "Aircraft";
-  addHeader(container, `## ✈️ ${flightLabel}`, subtitle, logo !== null);
+  addHeader(container, `## ${EMOJI.headingFlight} ${flightLabel}`, subtitle, logo !== null);
 
   if (airlabs?.dep_iata || airlabs?.arr_iata) {
     const dep = airlabs.dep_iata
@@ -608,7 +611,7 @@ export function buildPlaneMessage(args: BuildPlaneArgs) {
 
   const container = new ContainerBuilder().setAccentColor(ACCENT);
 
-  addHeader(container, `## ✈️ ${reg}`, type, logo !== null);
+  addHeader(container, `## ${EMOJI.headingFlight} ${reg}`, type, logo !== null);
 
   const specs = [
     fleet?.manufacturer ? `**Manufacturer:** ${fleet.manufacturer}` : null,

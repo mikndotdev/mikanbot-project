@@ -37,6 +37,7 @@ import type {
 } from "@/lib/elesite";
 import { formatHhmm, getOperationalDay, parseClockToMinutes } from "@/lib/jst";
 import { lineEmoji } from "@/lib/train-logos";
+import { EMOJI } from "@/lib/emojis";
 import { renderTrainMap } from "@/lib/train-map";
 import {
   iconUrlFromPath,
@@ -48,7 +49,7 @@ import {
 } from "@/lib/train-lines";
 
 const ACCENT = 0xff7700;
-const LOADING_EMOJI = "<a:loading:1272805571585642506>";
+
 const BAR_CELLS = 14;
 export const STOPS_PER_PAGE = 12;
 
@@ -261,10 +262,10 @@ export function deriveProgress(stops: NormalizedStop[], nowMinutes: number): Tra
 
 const WINDOW_SIZE = 4;
 
-export const SHINKANSEN_MARKER = "<:shinkansen_icon:1548009167980204062>";
-export const TRAIN_MARKER = "🚃";
-export const STOPPED_MARKER = "<a:stopped:1548528795059757086>";
-export const PROGRESS_MARKER = "<a:progress_arrows:1548527738279690295>";
+export const SHINKANSEN_MARKER = EMOJI.trainShinkansen;
+export const TRAIN_MARKER = EMOJI.trainConventional;
+export const STOPPED_MARKER = EMOJI.atStation;
+export const PROGRESS_MARKER = EMOJI.approaching;
 const PASSED_SEPARATOR = " ━━ ";
 const UPCOMING_SEPARATOR = " → ";
 
@@ -369,10 +370,10 @@ export function resolveTrainIconUrl(
 }
 
 export function statusEmoji(status: number): string {
-  if (status >= 3) return "🔴";
-  if (status === 2) return "🟠";
-  if (status === 1) return "🟡";
-  return "🔵";
+  if (status >= 3) return EMOJI.statusSuspended;
+  if (status === 2) return EMOJI.statusDelayedMajor;
+  if (status === 1) return EMOJI.statusDelayedMinor;
+  return EMOJI.statusNormal;
 }
 
 export function formatRailwayEntry(entry: ElesiteRailwayInfoEntry): string {
@@ -447,7 +448,11 @@ function noticeContainer(text: string): ContainerBuilder {
 export function buildLoadingMessage(label: string) {
   return {
     flags: MessageFlags.IsComponentsV2 as const,
-    components: [noticeContainer(`## 🚆 \`${label}\`\n${LOADING_EMOJI} 情報を取得しています…`)],
+    components: [
+      noticeContainer(
+        `## ${EMOJI.headingTrain} \`${label}\`\n${EMOJI.loading} 情報を取得しています…`,
+      ),
+    ],
   };
 }
 
@@ -546,11 +551,11 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const page = resolvePage(state.page, stops, progress, runningToday);
 
   let statusBadge: string;
-  if (!runningToday) statusBadge = "⚫ 本日運休";
-  else if (isLive) statusBadge = "🟢 運行中";
-  else if (progress.status === "before") statusBadge = "🕐 発車前";
-  else if (progress.status === "arrived") statusBadge = "🏁 運行終了";
-  else statusBadge = "🔵 予定";
+  if (!runningToday) statusBadge = `${EMOJI.statusNotRunning} 本日運休`;
+  else if (isLive) statusBadge = `${EMOJI.statusLive} 運行中`;
+  else if (progress.status === "before") statusBadge = `${EMOJI.statusBeforeDeparture} 発車前`;
+  else if (progress.status === "arrived") statusBadge = `${EMOJI.statusFinished} 運行終了`;
+  else statusBadge = `${EMOJI.statusNormal} 予定`;
 
   const container = new ContainerBuilder().setAccentColor(parseAccent(positions?.rosen_color));
 
@@ -657,7 +662,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       new ButtonBuilder()
         .setCustomId(encodeTrainId("prev", pagedState))
         .setLabel("前")
-        .setEmoji("◀️")
+        .setEmoji(EMOJI.buttonPrev)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page <= 0),
     );
@@ -667,7 +672,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
     new ButtonBuilder()
       .setCustomId(encodeTrainId("refresh", pagedState))
       .setLabel("更新")
-      .setEmoji("🔄")
+      .setEmoji(EMOJI.buttonRefresh)
       .setStyle(ButtonStyle.Primary),
   );
 
@@ -676,13 +681,13 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       new ButtonBuilder()
         .setCustomId(encodeTrainId("next", pagedState))
         .setLabel("次")
-        .setEmoji("▶️")
+        .setEmoji(EMOJI.buttonNext)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page >= totalPages - 1),
       new ButtonBuilder()
         .setCustomId(encodeTrainId("collapse", pagedState))
         .setLabel("折りたたむ")
-        .setEmoji("🔼")
+        .setEmoji(EMOJI.buttonCollapse)
         .setStyle(ButtonStyle.Secondary),
     );
   } else {
@@ -690,7 +695,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       new ButtonBuilder()
         .setCustomId(encodeTrainId("expand", pagedState))
         .setLabel("詳細")
-        .setEmoji("🔽")
+        .setEmoji(EMOJI.buttonExpand)
         .setStyle(ButtonStyle.Secondary),
     );
   }
@@ -700,7 +705,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
       new ButtonBuilder()
         .setCustomId(encodeTrainId("set", pagedState))
         .setLabel("この列車に設定")
-        .setEmoji("🚆")
+        .setEmoji(EMOJI.buttonAssign)
         .setStyle(ButtonStyle.Secondary),
     );
   }
@@ -714,7 +719,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
         new ButtonBuilder()
           .setCustomId(encodeTrainId("maptrain", pagedState))
           .setLabel("地図を表示")
-          .setEmoji("🗺️")
+          .setEmoji(EMOJI.buttonMap)
           .setStyle(ButtonStyle.Secondary),
       );
     } else {
@@ -723,17 +728,17 @@ export function buildTrainMessage(args: BuildTrainArgs) {
           ? new ButtonBuilder()
               .setCustomId(encodeTrainId("mapline", pagedState))
               .setLabel("全線表示")
-              .setEmoji("🗺️")
+              .setEmoji(EMOJI.buttonMap)
               .setStyle(ButtonStyle.Secondary)
           : new ButtonBuilder()
               .setCustomId(encodeTrainId("maptrain", pagedState))
               .setLabel("列車に寄る")
-              .setEmoji("🔍")
+              .setEmoji(EMOJI.buttonZoomTrain)
               .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
           .setCustomId(encodeTrainId("mapoff", pagedState))
           .setLabel("地図を閉じる")
-          .setEmoji("❌")
+          .setEmoji(EMOJI.buttonClose)
           .setStyle(ButtonStyle.Secondary),
       );
     }
@@ -771,7 +776,9 @@ export async function renderTrainView(
 ) {
   const context = await resolveOperationalContext(state.rosenCode, now);
   if (!context) {
-    return buildNoticeMessage("## 🚆 列車情報\n路線のダイヤ情報を取得できませんでした。");
+    return buildNoticeMessage(
+      `## ${EMOJI.headingTrain} 列車情報\n路線のダイヤ情報を取得できませんでした。`,
+    );
   }
 
   const wantsMap = state.expanded && state.map !== "off";
@@ -787,7 +794,7 @@ export async function renderTrainView(
 
   if (!detail || !detail.retsuban) {
     return buildNoticeMessage(
-      "## 🚆 列車情報\n指定された列車が見つかりませんでした。ダイヤが改正された可能性があります。",
+      `## ${EMOJI.headingTrain} 列車情報\n指定された列車が見つかりませんでした。ダイヤが改正された可能性があります。`,
     );
   }
 

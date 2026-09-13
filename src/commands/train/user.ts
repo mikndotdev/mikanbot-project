@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { getAssignment } from "@/lib/train-assignment";
 import { lineLabel } from "@/lib/train-lines";
 import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
@@ -27,7 +28,7 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
 
   if (!target) {
     return interaction.reply({
-      content: "❌ ユーザーが指定されていません。",
+      content: `${EMOJI.error} ユーザーが指定されていません。`,
       flags: "Ephemeral",
     });
   }
@@ -37,7 +38,7 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
 
   if (!assignment) {
     return interaction.reply({
-      content: `❌ ${displayName} さんは列車を設定していません。`,
+      content: `${EMOJI.error} ${displayName} さんは列車を設定していません。`,
       flags: "Ephemeral",
     });
   }
@@ -60,7 +61,7 @@ export const userExecute: SubcommandExecuteFunction<typeof userOptions> = async 
     await interaction.editReply(message);
   } catch {
     await interaction.editReply(
-      buildNoticeMessage("## 🚆 列車情報\n情報の取得中にエラーが発生しました。"),
+      buildNoticeMessage(`## ${EMOJI.headingTrain} 列車情報\n情報の取得中にエラーが発生しました。`),
     );
   }
 };

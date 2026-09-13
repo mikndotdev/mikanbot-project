@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 import { fetchAirlineLogo, fetchFleet, fetchLiveByReg } from "@/lib/airlabs";
 import {
@@ -40,7 +41,9 @@ export const planeExecute: SubcommandExecuteFunction<typeof planeOptions> = asyn
 
   if (!fleet && !live) {
     return interaction.editReply(
-      buildNoticeMessage(`## ✈️ \`${reg}\`\nNo aircraft found for that registration.`),
+      buildNoticeMessage(
+        `## ${EMOJI.headingFlight} \`${reg}\`\nNo aircraft found for that registration.`,
+      ),
     );
   }
 

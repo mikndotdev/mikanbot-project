@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { getTrainPositions, resolveOperationalContext } from "@/lib/elesite";
 import type { ElesiteTrainPosition } from "@/lib/elesite";
 import { getOperationalDay } from "@/lib/jst";
@@ -58,7 +59,7 @@ export function buildLineMessage(
 
   if (trains.length === 0) {
     return buildNoticeMessage(
-      `## 🚆 運行中の列車\n**${label}**\n${day.currentTime} 現在、運行中の列車はありません。`,
+      `## ${EMOJI.headingTrain} 運行中の列車\n**${label}**\n${day.currentTime} 現在、運行中の列車はありません。`,
     );
   }
 
@@ -96,7 +97,7 @@ export const lineExecute: SubcommandExecuteFunction<typeof lineOptions> = async 
   if (!context) {
     return interaction.reply(
       buildNoticeMessage(
-        `## 🚆 運行中の列車\n**${lineLabel(rosenCode)}**\nダイヤ情報を取得できませんでした。`,
+        `## ${EMOJI.headingTrain} 運行中の列車\n**${lineLabel(rosenCode)}**\nダイヤ情報を取得できませんでした。`,
       ),
     );
   }

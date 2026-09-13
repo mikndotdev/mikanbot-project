@@ -1,6 +1,7 @@
 import { AttachmentBuilder } from "discord.js";
 import { createCommand } from "@/lib/command-builder";
 import { prisma } from "@/lib/db";
+import { EMOJI } from "@/lib/emojis";
 import { env } from "@/lib/env";
 
 function getLevelFromXP(xp: number): number {
@@ -45,7 +46,7 @@ export const rank = createCommand({
   if (!guildDB?.levelsEnabled) {
     return interaction.reply("Levels are disabled in this server");
   }
-  await interaction.reply("<a:loading:1272805571585642506>");
+  await interaction.reply(EMOJI.loading);
   const userDb = await prisma.user.findUnique({
     where: {
       id: interaction.user.id,

@@ -1,4 +1,5 @@
 import { getAssignment } from "@/lib/train-assignment";
+import { EMOJI } from "@/lib/emojis";
 import { lineLabel } from "@/lib/train-lines";
 import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
@@ -17,7 +18,7 @@ export const meExecute: SubcommandExecuteFunction<typeof meOptions> = async (int
 
   if (!assignment) {
     return interaction.reply({
-      content: "❌ 列車が設定されていません。`/train set` で設定できます。",
+      content: `${EMOJI.error} 列車が設定されていません。\`/train set\` で設定できます。`,
       flags: "Ephemeral",
     });
   }
@@ -43,7 +44,7 @@ export const meExecute: SubcommandExecuteFunction<typeof meOptions> = async (int
     await interaction.editReply(message);
   } catch {
     await interaction.editReply(
-      buildNoticeMessage("## 🚆 列車情報\n情報の取得中にエラーが発生しました。"),
+      buildNoticeMessage(`## ${EMOJI.headingTrain} 列車情報\n情報の取得中にエラーが発生しました。`),
     );
   }
 };

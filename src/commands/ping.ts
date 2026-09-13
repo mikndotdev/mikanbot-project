@@ -1,4 +1,5 @@
 import { createCommand } from "@/lib/command-builder";
+import { EMOJI } from "@/lib/emojis";
 
 export const ping = createCommand({
   name: "ping",
@@ -7,7 +8,7 @@ export const ping = createCommand({
   isPremium: false,
 }).execute(async (interaction) => {
   const ping = Math.abs(Math.round(interaction.client.ws.ping));
-  await interaction.reply("<a:loading:1272805571585642506>");
+  await interaction.reply(EMOJI.loading);
   const roundtrip = Math.abs(Date.now() - interaction.createdTimestamp);
   interaction.editReply(`API Latency: ${ping}ms\nRoundtrip: ${roundtrip}ms`);
 });

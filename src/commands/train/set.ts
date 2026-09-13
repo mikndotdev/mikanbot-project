@@ -1,4 +1,5 @@
 import { lineLabel, stripRouteTag } from "@/lib/train-lines";
+import { EMOJI } from "@/lib/emojis";
 import { setAssignment } from "@/lib/train-assignment";
 import {
   parseSelection,
@@ -29,7 +30,7 @@ export const setExecute: SubcommandExecuteFunction<typeof trainOptions> = async 
   const assignment = await resolveAssignment(selection.rosenCode, selection.retsubanId);
   if (!assignment) {
     return interaction.reply({
-      content: "❌ 列車が見つかりませんでした。候補から選び直してください。",
+      content: `${EMOJI.error} 列車が見つかりませんでした。候補から選び直してください。`,
       flags: "Ephemeral",
     });
   }
@@ -37,7 +38,7 @@ export const setExecute: SubcommandExecuteFunction<typeof trainOptions> = async 
   await setAssignment(interaction.user.id, assignment);
 
   return interaction.reply({
-    content: `✅ ${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。`,
+    content: `${EMOJI.success} ${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。`,
     flags: "Ephemeral",
   });
 };

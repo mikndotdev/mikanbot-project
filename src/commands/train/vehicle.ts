@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { getHenseiNameList, getSlimDiagram, resolveOperationalContext } from "@/lib/elesite";
 import { formatHhmm, getOperationalDay } from "@/lib/jst";
 import { isKnownLine, lineLabel, searchLines, stripRouteTag } from "@/lib/train-lines";
@@ -81,7 +82,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
   const context = await resolveOperationalContext(rosenCode);
   if (!context) {
     return interaction.editReply(
-      buildNoticeMessage("## 🚆 編成検索\nダイヤ情報を取得できませんでした。"),
+      buildNoticeMessage(`## ${EMOJI.headingTrain} 編成検索\nダイヤ情報を取得できませんでした。`),
     );
   }
 
@@ -94,7 +95,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
   if (matches.length === 0) {
     return interaction.editReply(
       buildNoticeMessage(
-        `## 🚆 編成検索\n**${vehicle}**（${lineLabel(rosenCode)}）\n本日この路線での運用はありません。`,
+        `## ${EMOJI.headingTrain} 編成検索\n**${vehicle}**（${lineLabel(rosenCode)}）\n本日この路線での運用はありません。`,
       ),
     );
   }
@@ -114,7 +115,7 @@ export const vehicleExecute: SubcommandExecuteFunction<typeof vehicleOptions> = 
       .join("\n");
     return interaction.editReply(
       buildNoticeMessage(
-        `## 🚆 編成検索\n**${vehicle}**（${lineLabel(rosenCode)}）\n現在は運用中ではありません。本日の運用 ${matches.length} 本:\n\n${list}`,
+        `## ${EMOJI.headingTrain} 編成検索\n**${vehicle}**（${lineLabel(rosenCode)}）\n現在は運用中ではありません。本日の運用 ${matches.length} 本:\n\n${list}`,
       ),
     );
   }

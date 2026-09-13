@@ -1,4 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { decodeTrainId, renderTrainView } from "@/lib/train";
 import type { MapMode } from "@/lib/train";
 import { setAssignment } from "@/lib/train-assignment";
@@ -15,7 +16,7 @@ export async function handleTrainComponent(interaction: ButtonInteraction) {
     const assignment = await resolveAssignment(state.rosenCode, state.retsubanId);
     if (!assignment) {
       return interaction.reply({
-        content: "❌ 列車が見つかりませんでした。ダイヤが変わった可能性があります。",
+        content: `${EMOJI.error} 列車が見つかりませんでした。ダイヤが変わった可能性があります。`,
         flags: "Ephemeral",
       });
     }
@@ -23,7 +24,7 @@ export async function handleTrainComponent(interaction: ButtonInteraction) {
     await setAssignment(interaction.user.id, assignment);
 
     return interaction.reply({
-      content: `✅ ${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。`,
+      content: `${EMOJI.success} ${stripRouteTag(assignment.shubetsu)} ${stripRouteTag(assignment.retsuban)}（${lineLabel(assignment.rosenCode)}・${assignment.ikisaki}ゆき）を設定しました。翌4時に自動解除されます。`,
       flags: "Ephemeral",
     });
   }

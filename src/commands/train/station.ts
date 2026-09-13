@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { getStationTimetable, resolveOperationalContext } from "@/lib/elesite";
 import type { ElesiteStationTimetableEntry } from "@/lib/elesite";
 import { getOperationalDay } from "@/lib/jst";
@@ -113,7 +114,7 @@ export const stationExecute: SubcommandExecuteFunction<typeof stationOptions> = 
   const context = await resolveOperationalContext(rosenCode);
   if (!context) {
     return interaction.reply(
-      buildNoticeMessage(`## 🚆 発車時刻表\nダイヤ情報を取得できませんでした。`),
+      buildNoticeMessage(`## ${EMOJI.headingTrain} 発車時刻表\nダイヤ情報を取得できませんでした。`),
     );
   }
 

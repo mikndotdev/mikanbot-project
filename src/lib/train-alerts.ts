@@ -1,4 +1,5 @@
 import type { Client } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import * as Sentry from "@sentry/bun";
 import { getRailwayInfo, RAILWAY_STATUS_NORMAL, sortRailwayInfo } from "@/lib/elesite";
 import type { ElesiteRailwayInfoEntry } from "@/lib/elesite";
@@ -107,7 +108,7 @@ async function notify(
     const user = await client.users.fetch(userId);
     await user.send({
       content: [
-        `⚠️ **${lineLabel(rosenCode)}** で新たな運行情報が発表されました`,
+        `${EMOJI.statusWarning} **${lineLabel(rosenCode)}** で新たな運行情報が発表されました`,
         `-# あなたの列車: ${stripRouteTag(shubetsu)} ${stripRouteTag(retsuban)}`,
         "",
         formatRailwayEntry(entry),
@@ -222,7 +223,7 @@ export async function runAlertTick(client: Client) {
     } else if (await isDisrupted(rosenCode, day.selectDate)) {
       const normal = fresh.find((e) => e.status === RAILWAY_STATUS_NORMAL);
       if (normal) {
-        body = `🔵 **平常運転に戻りました**${normal.toukou_time ? `　-# ${normal.toukou_time}` : ""}\n-# 利用者投稿による情報です`;
+        body = `${EMOJI.statusNormal} **平常運転に戻りました**${normal.toukou_time ? `　-# ${normal.toukou_time}` : ""}\n-# 利用者投稿による情報です`;
         await setDisrupted(rosenCode, day.selectDate, false);
       }
     }

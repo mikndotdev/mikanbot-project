@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { isKnownLine, lineLabel, searchLines } from "@/lib/train-lines";
 import { addSubscription, MAX_LINES_PER_GUILD } from "@/lib/train-subscriptions";
 import type {
@@ -52,7 +53,7 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageChannels)) {
     return interaction.reply({
-      content: "❌ この操作には「チャンネルの管理」権限が必要です。",
+      content: `${EMOJI.error} この操作には「チャンネルの管理」権限が必要です。`,
       flags: "Ephemeral",
     });
   }
@@ -60,7 +61,7 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
   const rosenCode = options.line;
   if (!isKnownLine(rosenCode)) {
     return interaction.reply({
-      content: "❌ 路線が正しく選択されていません。候補から選んでください。",
+      content: `${EMOJI.error} 路線が正しく選択されていません。候補から選んでください。`,
       flags: "Ephemeral",
     });
   }
@@ -70,7 +71,7 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
   );
   if (!channel || !channel.isTextBased()) {
     return interaction.reply({
-      content: "❌ テキストチャンネルを指定してください。",
+      content: `${EMOJI.error} テキストチャンネルを指定してください。`,
       flags: "Ephemeral",
     });
   }
@@ -82,7 +83,7 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
     !permissions.has(PermissionFlagsBits.SendMessages)
   ) {
     return interaction.reply({
-      content: `❌ ${channel.toString()} に投稿する権限がありません。`,
+      content: `${EMOJI.error} ${channel.toString()} に投稿する権限がありません。`,
       flags: "Ephemeral",
     });
   }
@@ -96,19 +97,19 @@ export const statusSubscribeExecute: SubcommandExecuteFunction<typeof subscribeO
 
   if (result === "exists") {
     return interaction.reply({
-      content: `❌ ${channel.toString()} は既に **${lineLabel(rosenCode)}** を購読しています。`,
+      content: `${EMOJI.error} ${channel.toString()} は既に **${lineLabel(rosenCode)}** を購読しています。`,
       flags: "Ephemeral",
     });
   }
   if (result === "limit") {
     return interaction.reply({
-      content: `❌ 1サーバーあたり ${MAX_LINES_PER_GUILD} 路線までです。\`/train list-subscriptions\` で整理してください。`,
+      content: `${EMOJI.error} 1サーバーあたり ${MAX_LINES_PER_GUILD} 路線までです。\`/train list-subscriptions\` で整理してください。`,
       flags: "Ephemeral",
     });
   }
 
   return interaction.reply({
-    content: `✅ ${channel.toString()} を **${lineLabel(rosenCode)}** の運行情報に登録しました。`,
+    content: `${EMOJI.success} ${channel.toString()} を **${lineLabel(rosenCode)}** の運行情報に登録しました。`,
     flags: "Ephemeral",
   });
 };

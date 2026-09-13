@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, AttachmentBuilder } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import {
   getMapGeometry,
   getMapTrainPositions,
@@ -56,7 +57,9 @@ export const mapExecute: SubcommandExecuteFunction<typeof mapOptions> = async (
   const context = await resolveOperationalContext(rosenCode);
   if (!context) {
     return interaction.editReply(
-      buildNoticeMessage(`## 🗺️ 路線地図\n**${label}**\nダイヤ情報を取得できませんでした。`),
+      buildNoticeMessage(
+        `## ${EMOJI.headingMap} 路線地図\n**${label}**\nダイヤ情報を取得できませんでした。`,
+      ),
     );
   }
 
@@ -69,7 +72,7 @@ export const mapExecute: SubcommandExecuteFunction<typeof mapOptions> = async (
   if (!tracks || tracks.length === 0) {
     return interaction.editReply(
       buildNoticeMessage(
-        `## 🗺️ 路線地図\n**${label}**\nこの路線の地図データは提供されていません。\n-# \`/train line\` で走行中の列車を一覧できます。`,
+        `## ${EMOJI.headingMap} 路線地図\n**${label}**\nこの路線の地図データは提供されていません。\n-# \`/train line\` で走行中の列車を一覧できます。`,
       ),
     );
   }
@@ -77,7 +80,9 @@ export const mapExecute: SubcommandExecuteFunction<typeof mapOptions> = async (
   const image = await renderTrainMap(tracks, trains ?? []);
   if (!image) {
     return interaction.editReply(
-      buildNoticeMessage(`## 🗺️ 路線地図\n**${label}**\n地図の生成に失敗しました。`),
+      buildNoticeMessage(
+        `## ${EMOJI.headingMap} 路線地図\n**${label}**\n地図の生成に失敗しました。`,
+      ),
     );
   }
 

@@ -1,4 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { fetchAirlabsFlight, fetchAirlineLogo } from "@/lib/airlabs";
 import {
   applyZoom,
@@ -26,7 +27,7 @@ export async function handleFlightComponent(interaction: ButtonInteraction) {
   if (!live && !airlabs) {
     await interaction.editReply(
       buildNoticeMessage(
-        `## ✈️ \`${state.callsign}\`\nSignal lost — this flight is no longer being tracked (it may have landed).`,
+        `## ${EMOJI.headingFlight} \`${state.callsign}\`\nSignal lost — this flight is no longer being tracked (it may have landed).`,
       ),
     );
     return;

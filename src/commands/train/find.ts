@@ -1,4 +1,5 @@
 import { lineLabel } from "@/lib/train-lines";
+import { EMOJI } from "@/lib/emojis";
 import { buildLoadingMessage, buildNoticeMessage, renderTrainView, AUTO_PAGE } from "@/lib/train";
 import { parseSelection, trainAutocomplete, trainOptions } from "@/commands/train/shared";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
@@ -33,7 +34,7 @@ export const findExecute: SubcommandExecuteFunction<typeof trainOptions> = async
     await interaction.editReply(message);
   } catch {
     await interaction.editReply(
-      buildNoticeMessage("## 🚆 列車情報\n情報の取得中にエラーが発生しました。"),
+      buildNoticeMessage(`## ${EMOJI.headingTrain} 列車情報\n情報の取得中にエラーが発生しました。`),
     );
   }
 };

@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import { getRailwayInfo, RAILWAY_STATUS_NORMAL, sortRailwayInfo } from "@/lib/elesite";
 import { getOperationalDay } from "@/lib/jst";
 import { isKnownLine, lineLabel, searchLines } from "@/lib/train-lines";
@@ -53,7 +54,9 @@ export const delaysExecute: SubcommandExecuteFunction<typeof delaysOptions> = as
 
   if (entries.length === 0) {
     return interaction.reply(
-      buildNoticeMessage(`## 🚆 運行情報\n**${label}**\n本日の運行情報の投稿はありません。`),
+      buildNoticeMessage(
+        `## ${EMOJI.headingTrain} 運行情報\n**${label}**\n本日の運行情報の投稿はありません。`,
+      ),
     );
   }
 
@@ -71,7 +74,7 @@ export const delaysExecute: SubcommandExecuteFunction<typeof delaysOptions> = as
 
   return interaction.reply(
     buildNoticeMessage(
-      `## 🚆 運行情報\n**${label}**　${day.selectDate}\n${header}\n\n${body}${more}\n-# 利用者投稿による情報です`,
+      `## ${EMOJI.headingTrain} 運行情報\n**${label}**　${day.selectDate}\n${header}\n\n${body}${more}\n-# 利用者投稿による情報です`,
     ),
   );
 };

@@ -1,4 +1,5 @@
 import { clearAssignment } from "@/lib/train-assignment";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 
 const clearOptions = [] as const;
@@ -14,7 +15,9 @@ export const clearExecute: SubcommandExecuteFunction<typeof clearOptions> = asyn
   const removed = await clearAssignment(interaction.user.id);
 
   return interaction.reply({
-    content: removed ? "✅ 列車の設定を解除しました。" : "❌ 列車は設定されていません。",
+    content: removed
+      ? `${EMOJI.success} 列車の設定を解除しました。`
+      : `${EMOJI.error} 列車は設定されていません。`,
     flags: "Ephemeral",
   });
 };

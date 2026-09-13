@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { EMOJI } from "@/lib/emojis";
 import type { SubcommandConfig, SubcommandExecuteFunction } from "@/types/command";
 import { prisma } from "@/lib/db";
 
@@ -44,7 +45,7 @@ export const xfixAutoTranslateExecute: SubcommandExecuteFunction<
   });
 
   return interaction.reply({
-    content: `✅ Auto-translation for X posts ${options.enabled ? "enabled" : "disabled"}`,
+    content: `${EMOJI.success} Auto-translation for X posts ${options.enabled ? "enabled" : "disabled"}`,
     flags: "Ephemeral",
   });
 };

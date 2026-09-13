@@ -1,4 +1,5 @@
 import { getTrainCross, resolveOperationalContext } from "@/lib/elesite";
+import { EMOJI } from "@/lib/emojis";
 import type { ElesiteCrossEntry } from "@/lib/elesite";
 import { lineLabel, stripRouteTag } from "@/lib/train-lines";
 import { buildNoticeMessage, lineEmojiPrefix } from "@/lib/train";
@@ -55,7 +56,9 @@ export const crossExecute: SubcommandExecuteFunction<typeof trainOptions> = asyn
   const context = await resolveOperationalContext(selection.rosenCode);
   if (!context) {
     return interaction.reply(
-      buildNoticeMessage("## 🚆 すれ違う列車\nダイヤ情報を取得できませんでした。"),
+      buildNoticeMessage(
+        `## ${EMOJI.headingTrain} すれ違う列車\nダイヤ情報を取得できませんでした。`,
+      ),
     );
   }
 
