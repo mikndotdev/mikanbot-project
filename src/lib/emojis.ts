@@ -48,9 +48,13 @@ export const EMOJI = {
   buttonZoomTrain: "🔍",
   buttonClose: "❌",
   buttonUnsubscribe: "🔕",
+  buttonShuffle: "🔀",
+  buttonZoomOut: "➖",
+  buttonZoomIn: "➕",
 
   success: "✅",
   error: "❌",
+  owner: "👤",
 
   headingTrain: "🚆",
   headingMap: "🗺️",

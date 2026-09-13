@@ -424,7 +424,7 @@ function addPhotoBlock(
         new ButtonBuilder()
           .setCustomId(buttonId)
           .setLabel("Randomize photo")
-          .setEmoji("🔀")
+          .setEmoji(EMOJI.buttonShuffle)
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(photos.length < 2),
       ),
@@ -457,13 +457,13 @@ function addMapBlock(
       new ButtonBuilder()
         .setCustomId(zoomOutId)
         .setLabel("Zoom out")
-        .setEmoji("➖")
+        .setEmoji(EMOJI.buttonZoomOut)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(zoom <= ZOOM_MIN),
       new ButtonBuilder()
         .setCustomId(zoomInId)
         .setLabel("Zoom in")
-        .setEmoji("➕")
+        .setEmoji(EMOJI.buttonZoomIn)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(zoom >= ZOOM_MAX),
     ),

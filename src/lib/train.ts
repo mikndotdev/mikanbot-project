@@ -285,7 +285,7 @@ export function buildStationWindow(
   win.forEach((stop, index) => {
     const global = start + index;
     const isCurrent = global === progress.currentIndex;
-    parts.push(isCurrent && atStation ? `${marker}${stop.station}` : stop.station);
+    parts.push(isCurrent && atStation ? `[${stop.station}]` : stop.station);
     if (index === win.length - 1) return;
     if (isCurrent && !atStation) parts.push(` ${marker} `);
     else parts.push(global < progress.currentIndex ? PASSED_SEPARATOR : UPCOMING_SEPARATOR);
@@ -562,7 +562,7 @@ export function buildTrainMessage(args: BuildTrainArgs) {
   const logo = lineEmoji(state.rosenCode);
   const title = `## ${logo ? `${logo} ` : ""}${stripRouteTag(detail.shubetsu)} ${stripRouteTag(detail.retsuban)}`;
   const subtitle = `${lineLabel(state.rosenCode)} ・ ${detail.ikisaki}ゆき`;
-  const ownerLine = owner ? `-# 👤 ${owner.displayName} の列車\n` : "";
+  const ownerLine = owner ? `-# ${EMOJI.owner} ${owner.displayName} の列車\n` : "";
   const header = `${ownerLine}${title}\n${subtitle}`;
 
   if (icon) {
