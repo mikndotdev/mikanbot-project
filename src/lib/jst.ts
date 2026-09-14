@@ -1,6 +1,8 @@
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const DAY_START_HOUR = 4;
 
+export const OPERATIONAL_DAY_START_MINUTES = DAY_START_HOUR * 60;
+
 export interface OperationalDay {
   selectDate: string;
   currentTime: string;

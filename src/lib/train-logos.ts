@@ -63,3 +63,9 @@ export function lineOperator(rosenCode: string): string | null {
 export function lineEmoji(rosenCode: string): string {
   return operatorEmoji(lineOperator(rosenCode)) ?? "";
 }
+
+export function operatorIconUrl(rosenCode: string): string | null {
+  const operator = lineOperator(rosenCode);
+  const entry = operator ? byCompany.get(operator.normalize("NFC")) : undefined;
+  return entry ? `https://cdn.discordapp.com/emojis/${entry.id}.png` : null;
+}

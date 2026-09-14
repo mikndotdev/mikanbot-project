@@ -9,10 +9,36 @@ export interface TrainSubscription {
   channelId: string;
   rosenCode: string;
   createdBy: string;
+  webhookId: string | null;
+  webhookToken: string | null;
   failures: number;
 }
 
 export type AddResult = "ok" | "exists" | "limit";
+
+type SubscriptionRow = {
+  id: string;
+  guildId: string;
+  channelId: string;
+  rosenCode: string;
+  createdBy: string;
+  webhookId: string | null;
+  webhookToken: string | null;
+  failures: number;
+};
+
+function toSubscription(row: SubscriptionRow): TrainSubscription {
+  return {
+    id: row.id,
+    guildId: row.guildId,
+    channelId: row.channelId,
+    rosenCode: row.rosenCode,
+    createdBy: row.createdBy,
+    webhookId: row.webhookId,
+    webhookToken: row.webhookToken,
+    failures: row.failures,
+  };
+}
 
 export function subscriptionId(channelId: string, rosenCode: string): string {
   return `${channelId}-${rosenCode}`;
@@ -38,25 +64,21 @@ export async function addSubscription(
   return "ok";
 }
 
-export async function removeSubscription(channelId: string, rosenCode: string): Promise<boolean> {
+export async function removeSubscription(
+  channelId: string,
+  rosenCode: string,
+): Promise<TrainSubscription | null> {
   const id = subscriptionId(channelId, rosenCode);
   const existing = await prisma.trainSubscription.findUnique({ where: { id } });
-  if (!existing) return false;
+  if (!existing) return null;
   await prisma.trainSubscription.delete({ where: { id } });
-  return true;
+  return toSubscription(existing);
 }
 
 export async function listSubscriptions(guildId: string): Promise<TrainSubscription[]> {
   const rows = await prisma.trainSubscription.findMany({ where: { guildId } });
   return rows
-    .map((row) => ({
-      id: row.id,
-      guildId: row.guildId,
-      channelId: row.channelId,
-      rosenCode: row.rosenCode,
-      createdBy: row.createdBy,
-      failures: row.failures,
-    }))
+    .map(toSubscription)
     .sort(
       (a, b) => a.channelId.localeCompare(b.channelId) || a.rosenCode.localeCompare(b.rosenCode),
     );
@@ -67,14 +89,7 @@ export async function subscribedLines(): Promise<Map<string, TrainSubscription[]
   const byLine = new Map<string, TrainSubscription[]>();
   for (const row of rows) {
     const list = byLine.get(row.rosenCode) ?? [];
-    list.push({
-      id: row.id,
-      guildId: row.guildId,
-      channelId: row.channelId,
-      rosenCode: row.rosenCode,
-      createdBy: row.createdBy,
-      failures: row.failures,
-    });
+    list.push(toSubscription(row));
     byLine.set(row.rosenCode, list);
   }
   return byLine;
@@ -100,4 +115,25 @@ export async function clearFailures(id: string): Promise<void> {
   const existing = await prisma.trainSubscription.findUnique({ where: { id } });
   if (!existing || existing.failures === 0) return;
   await prisma.trainSubscription.update({ where: { id }, data: { failures: 0 } });
+}
+
+export async function subscriptionsForChannel(channelId: string): Promise<TrainSubscription[]> {
+  const rows = await prisma.trainSubscription.findMany({ where: { channelId } });
+  return rows.map(toSubscription);
+}
+
+export async function setChannelWebhook(
+  channelId: string,
+  webhookId: string | null,
+  webhookToken: string | null,
+): Promise<void> {
+  await prisma.trainSubscription.updateMany({
+    where: { channelId },
+    data: { webhookId, webhookToken },
+  });
+}
+
+export async function allSubscriptions(): Promise<TrainSubscription[]> {
+  const rows = await prisma.trainSubscription.findMany();
+  return rows.map(toSubscription);
 }

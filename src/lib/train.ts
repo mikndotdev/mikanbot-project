@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/bun";
 import {
   ActionRowBuilder,
+  EmbedBuilder,
   time,
   TimestampStyles,
   AttachmentBuilder,
@@ -41,9 +42,10 @@ import {
   formatHhmm,
   getOperationalDay,
   operationalMinutesToUnix,
+  OPERATIONAL_DAY_START_MINUTES,
   parseClockToMinutes,
 } from "@/lib/jst";
-import { lineEmoji } from "@/lib/train-logos";
+import { lineEmoji, operatorIconUrl } from "@/lib/train-logos";
 import { EMOJI } from "@/lib/emojis";
 import { renderTrainMap } from "@/lib/train-map";
 import {
@@ -411,6 +413,55 @@ export function formatRailwayEntry(entry: ElesiteRailwayInfoEntry): string {
   const detail = (entry.detail ?? "").trim();
   return detail ? `${head}\n${detail.split("\n").join("\n")}` : head;
 }
+
+export function railwayEntryUnix(
+  entry: ElesiteRailwayInfoEntry,
+  selectDate: string,
+): number | null {
+  const minutes = parseClockToMinutes(entry.toukou_time);
+  if (minutes === null) return null;
+  const operational = minutes < OPERATIONAL_DAY_START_MINUTES ? minutes + 1440 : minutes;
+  return operationalMinutesToUnix(selectDate, operational);
+}
+
+export function formatRailwayEmbed(
+  entry: ElesiteRailwayInfoEntry,
+  rosenCode: string,
+  selectDate: string,
+  botIconUrl?: string | null,
+): EmbedBuilder {
+  const unix = railwayEntryUnix(entry, selectDate);
+  const stamp = unix === null ? "" : `  ${time(unix, TimestampStyles.ShortDateShortTime)}`;
+  const reason = entry.reason ? `・${entry.reason}` : "";
+  const direction = entry.direction ? `・${entry.direction}` : "";
+  const head = `${statusEmoji(entry.status)} **${entry.info ?? "運行情報"}**${reason}${direction}${stamp}`;
+  const detail = (entry.detail ?? "").trim();
+
+  const embed = new EmbedBuilder()
+    .setAuthor({ name: lineLabel(rosenCode), iconURL: operatorIconUrl(rosenCode) ?? undefined })
+    .setDescription(detail ? `${head}\n\n${detail}` : head)
+    .setFooter({ text: ALERT_FOOTER, iconURL: botIconUrl ?? undefined })
+    .setColor(parseAccent(entry.color));
+
+  return embed;
+}
+
+export function buildRecoveryEmbed(
+  entry: ElesiteRailwayInfoEntry,
+  rosenCode: string,
+  selectDate: string,
+  botIconUrl?: string | null,
+): EmbedBuilder {
+  const unix = railwayEntryUnix(entry, selectDate);
+  const stamp = unix === null ? "" : `  ${time(unix, TimestampStyles.ShortDateShortTime)}`;
+  return new EmbedBuilder()
+    .setAuthor({ name: lineLabel(rosenCode), iconURL: operatorIconUrl(rosenCode) ?? undefined })
+    .setDescription(`${EMOJI.statusNormal} **平常運転に戻りました**${stamp}`)
+    .setFooter({ text: ALERT_FOOTER, iconURL: botIconUrl ?? undefined })
+    .setColor(parseAccent(entry.color ?? "#007bff"));
+}
+
+export const ALERT_FOOTER = "Powered by MikanBot・利用者投稿による情報です";
 
 export function buildDisruptionBlock(railwayInfo: ElesiteRailwayInfo | null): string | null {
   const latest = latestRailwayInfo(railwayInfo);

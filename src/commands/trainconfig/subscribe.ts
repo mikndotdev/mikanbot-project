@@ -1,7 +1,12 @@
 import { ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js";
 import { EMOJI } from "@/lib/emojis";
 import { isKnownLine, lineLabel, searchLines } from "@/lib/train-lines";
-import { addSubscription, MAX_LINES_PER_GUILD } from "@/lib/train-subscriptions";
+import {
+  addSubscription,
+  MAX_LINES_PER_GUILD,
+  removeSubscription,
+} from "@/lib/train-subscriptions";
+import { ensureChannelWebhook } from "@/lib/train-webhooks";
 import type {
   AutocompleteHandlers,
   SubcommandConfig,
@@ -88,6 +93,13 @@ export const subscribeExecute: SubcommandExecuteFunction<typeof subscribeOptions
     });
   }
 
+  if (!permissions.has(PermissionFlagsBits.ManageWebhooks)) {
+    return interaction.reply({
+      content: `${EMOJI.error} 運行情報はWebhookで配信されます。${channel.toString()} で「ウェブフックの管理」権限を付与してください。`,
+      flags: "Ephemeral",
+    });
+  }
+
   const result = await addSubscription(
     interaction.guild.id,
     channel.id,
@@ -104,6 +116,15 @@ export const subscribeExecute: SubcommandExecuteFunction<typeof subscribeOptions
   if (result === "limit") {
     return interaction.reply({
       content: `${EMOJI.error} 1サーバーあたり ${MAX_LINES_PER_GUILD} 路線までです。\`/trainconfig list\` で整理してください。`,
+      flags: "Ephemeral",
+    });
+  }
+
+  const webhook = await ensureChannelWebhook(interaction.client, channel.id);
+  if (!webhook) {
+    await removeSubscription(channel.id, rosenCode);
+    return interaction.reply({
+      content: `${EMOJI.error} ${channel.toString()} にWebhookを作成できませんでした。権限を確認してもう一度お試しください。`,
       flags: "Ephemeral",
     });
   }

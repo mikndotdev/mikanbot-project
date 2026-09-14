@@ -2,6 +2,7 @@ import { PermissionFlagsBits, type ButtonInteraction } from "discord.js";
 import { EMOJI } from "@/lib/emojis";
 import { lineLabel } from "@/lib/train-lines";
 import { listSubscriptions, removeSubscription } from "@/lib/train-subscriptions";
+import { deleteWebhookIfUnused } from "@/lib/train-webhooks";
 import { buildSubscriptionList, decodeSubId } from "@/commands/trainconfig/list";
 
 export async function handleTrainSubComponent(interaction: ButtonInteraction) {
@@ -32,6 +33,7 @@ export async function handleTrainSubComponent(interaction: ButtonInteraction) {
   await interaction.update(buildSubscriptionList(subs, 0));
 
   if (removed) {
+    await deleteWebhookIfUnused(interaction.client, removed);
     await interaction.followUp({
       content: `${EMOJI.success} <#${decoded.channelId}> の **${lineLabel(decoded.rosenCode)}** の登録を解除しました。`,
       flags: "Ephemeral",

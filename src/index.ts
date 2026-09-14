@@ -1,7 +1,6 @@
 import { start } from "@/api/server";
 import { deployCommands } from "@/deploy";
-import { setPresence } from "@/presence";
-import { startTrainAlerts } from "@/lib/train-alerts";
+import { registerCronJobs } from "@/lib/cron";
 import { handleAutocomplete } from "@/handlers/autocomplete";
 import { handleCommand } from "@/handlers/command";
 import { handleMessageCommand } from "@/handlers/messageCommand";
@@ -77,8 +76,7 @@ client.on("shardError", (error, shardId) => {
 client.on("clientReady", () => {
   Sentry.logger.info(Sentry.logger.fmt`Logged in as ${client.user?.tag}!`);
   deployCommands();
-  setPresence(client);
-  startTrainAlerts(client);
+  registerCronJobs(client);
 });
 
 client.on("messageReactionAdd", async (reaction, user) => {

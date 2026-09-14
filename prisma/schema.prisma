@@ -61,11 +61,13 @@ model trainAssignment {
 }
 
 model trainSubscription {
-  id        String   @id
-  guildId   String
-  channelId String
-  rosenCode String
-  createdBy String
-  failures  Int      @default(0)
-  createdAt DateTime @default(now())
+  id           String   @id
+  guildId      String
+  channelId    String
+  rosenCode    String
+  createdBy    String
+  webhookId    String?
+  webhookToken String?
+  failures     Int      @default(0)
+  createdAt    DateTime @default(now())
 }

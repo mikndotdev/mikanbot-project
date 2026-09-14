@@ -1,4 +1,4 @@
-import type { Client } from "discord.js";
+import { WebhookClient, type Client, type EmbedBuilder } from "discord.js";
 import { EMOJI } from "@/lib/emojis";
 import * as Sentry from "@sentry/bun";
 import { getRailwayInfo, RAILWAY_STATUS_NORMAL, sortRailwayInfo } from "@/lib/elesite";
@@ -7,22 +7,26 @@ import { getOperationalDay, secondsUntilOperationalDayEnd } from "@/lib/jst";
 import { prisma } from "@/lib/db";
 import { ensureRedis } from "@/lib/redis";
 import { lineLabel, stripRouteTag } from "@/lib/train-lines";
-import { buildNoticeMessage, formatRailwayEntry, lineEmojiPrefix } from "@/lib/train";
+import { operatorIconUrl } from "@/lib/train-logos";
+import { buildRecoveryEmbed, formatRailwayEmbed } from "@/lib/train";
 import {
   clearFailures,
-  dropSubscription,
   recordFailure,
+  setChannelWebhook,
   subscribedLines,
 } from "@/lib/train-subscriptions";
+import {
+  dropSubscriptionWithWebhook,
+  ensureChannelWebhook,
+  isDeadChannel,
+  isDeadWebhook,
+} from "@/lib/train-webhooks";
 import type { TrainSubscription } from "@/lib/train-subscriptions";
 
-const POLL_MS = 60_000;
 const MAX_LINES_PER_TICK = 25;
 const DM_GAP_MS = 400;
 const CANNOT_DM = 50007;
-const PERMANENT_CHANNEL_ERRORS = new Set([10003, 50001, 50013]);
 
-let started = false;
 let cursor = 0;
 
 function disruptedKey(rosenCode: string, selectDate: string): string {
@@ -103,17 +107,13 @@ async function notify(
   entry: ElesiteRailwayInfoEntry,
   retsuban: string,
   shubetsu: string,
+  selectDate: string,
 ) {
   try {
     const user = await client.users.fetch(userId);
     await user.send({
-      content: [
-        `${EMOJI.statusWarning} **${lineLabel(rosenCode)}** で新たな運行情報が発表されました`,
-        `-# あなたの列車: ${stripRouteTag(shubetsu)} ${stripRouteTag(retsuban)}`,
-        "",
-        formatRailwayEntry(entry),
-        "-# 利用者投稿による情報です",
-      ].join("\n"),
+      content: `${EMOJI.statusWarning} **${lineLabel(rosenCode)}** で新たな運行情報が発表されました（${stripRouteTag(shubetsu)} ${stripRouteTag(retsuban)}）`,
+      embeds: [formatRailwayEmbed(entry, rosenCode, selectDate, client.user?.displayAvatarURL())],
     });
   } catch (error) {
     if ((error as { code?: unknown }).code === CANNOT_DM) {
@@ -128,28 +128,58 @@ async function notifyChannel(
   client: Client,
   sub: TrainSubscription,
   rosenCode: string,
-  body: string,
+  embed: EmbedBuilder,
 ) {
+  const payload = {
+    username: lineLabel(rosenCode),
+    avatarURL: operatorIconUrl(rosenCode) ?? undefined,
+    embeds: [embed],
+  };
+
   try {
-    const channel = await client.channels.fetch(sub.channelId);
-    if (!channel || !channel.isSendable()) {
-      await dropSubscription(sub.id);
-      Sentry.logger.warn("train subscription: channel not sendable, removed", {
+    const credentials =
+      sub.webhookId && sub.webhookToken
+        ? { id: sub.webhookId, token: sub.webhookToken }
+        : await ensureChannelWebhook(client, sub.channelId);
+
+    if (!credentials) {
+      const removed = await recordFailure(sub.id);
+      Sentry.logger.warn("train subscription: no webhook available", {
         channelId: sub.channelId,
+        removed,
       });
       return;
     }
-    await channel.send(
-      buildNoticeMessage(`## ${lineEmojiPrefix(rosenCode)}${lineLabel(rosenCode)}\n${body}`),
-    );
+
+    await new WebhookClient(credentials).send(payload);
     await clearFailures(sub.id);
   } catch (error) {
-    const code = (error as { code?: unknown }).code;
-    if (typeof code === "number" && PERMANENT_CHANNEL_ERRORS.has(code)) {
-      await dropSubscription(sub.id);
-      Sentry.logger.warn("train subscription: permanent channel error, removed", {
+    if (isDeadWebhook(error)) {
+      Sentry.logger.warn("train subscription: webhook gone, recreating", {
         channelId: sub.channelId,
-        code,
+      });
+      await setChannelWebhook(sub.channelId, null, null);
+      const replacement = await ensureChannelWebhook(client, sub.channelId);
+      if (!replacement) {
+        await recordFailure(sub.id);
+        return;
+      }
+      try {
+        await new WebhookClient(replacement).send(payload);
+        await clearFailures(sub.id);
+      } catch (retryError) {
+        const removed = await recordFailure(sub.id);
+        Sentry.captureException(retryError, {
+          tags: { source: "trainAlertChannel" },
+          extra: { channelId: sub.channelId, rosenCode, removed, retry: true },
+        });
+      }
+      return;
+    }
+    if (isDeadChannel(error)) {
+      await dropSubscriptionWithWebhook(client, sub);
+      Sentry.logger.warn("train subscription: channel gone, removed", {
+        channelId: sub.channelId,
       });
       return;
     }
@@ -206,7 +236,7 @@ export async function runAlertTick(client: Client) {
 
     for (const row of byUser.get(rosenCode) ?? []) {
       if (!latest) break;
-      await notify(client, row.id, rosenCode, latest, row.retsuban, row.shubetsu);
+      await notify(client, row.id, rosenCode, latest, row.retsuban, row.shubetsu, day.selectDate);
       await Bun.sleep(DM_GAP_MS);
     }
 
@@ -216,38 +246,24 @@ export async function runAlertTick(client: Client) {
       continue;
     }
 
-    let body: string | null = null;
+    const botIcon = client.user?.displayAvatarURL();
+    let embed: EmbedBuilder | null = null;
     if (latest) {
-      body = `${formatRailwayEntry(latest)}\n-# 利用者投稿による情報です`;
+      embed = formatRailwayEmbed(latest, rosenCode, day.selectDate, botIcon);
       await setDisrupted(rosenCode, day.selectDate, true);
     } else if (await isDisrupted(rosenCode, day.selectDate)) {
       const normal = fresh.find((e) => e.status === RAILWAY_STATUS_NORMAL);
       if (normal) {
-        body = `${EMOJI.statusNormal} **平常運転に戻りました**${normal.toukou_time ? `　-# ${normal.toukou_time}` : ""}\n-# 利用者投稿による情報です`;
+        embed = buildRecoveryEmbed(normal, rosenCode, day.selectDate, botIcon);
         await setDisrupted(rosenCode, day.selectDate, false);
       }
     }
 
-    if (!body) continue;
+    if (!embed) continue;
 
     for (const sub of subs) {
-      await notifyChannel(client, sub, rosenCode, body);
+      await notifyChannel(client, sub, rosenCode, embed);
       await Bun.sleep(DM_GAP_MS);
     }
   }
-}
-
-export function startTrainAlerts(client: Client) {
-  if (started) return;
-  started = true;
-
-  const run = () => {
-    runAlertTick(client).catch((error) => {
-      Sentry.captureException(error, { tags: { source: "trainAlerts" } });
-    });
-  };
-
-  Sentry.logger.info("train alert poller started", { intervalMs: POLL_MS });
-  setInterval(run, POLL_MS);
-  run();
 }
