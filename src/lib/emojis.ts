@@ -10,6 +10,7 @@ const CUSTOM = {
   shinkansen: { name: "shinkansen_icon", id: "1548009167980204062", animated: false },
   stopped: { name: "stopped", id: "1548528795059757086", animated: true },
   progressArrows: { name: "progress_arrows", id: "1548527738279690295", animated: true },
+  successTick: { name: "success_tick", id: "1555477990157058078", animated: true },
 } as const satisfies Record<string, CustomEmoji>;
 
 export type CustomEmojiKey = keyof typeof CUSTOM;
@@ -52,7 +53,7 @@ export const EMOJI = {
   buttonZoomOut: "➖",
   buttonZoomIn: "➕",
 
-  success: "✅",
+  success: customEmoji("successTick"),
   error: "❌",
   owner: "👤",
   destination: "🚪",
