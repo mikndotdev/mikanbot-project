@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum XFixType {
+  fxtwitter
+  vxtwitter
+}
+
 model User {
   id           String    @id
   premium      Boolean   @default(false)
@@ -46,6 +51,7 @@ model server {
   xfix                Boolean   @default(true)
   preferredLocale     String    @default("EN")
   xfixAutoTranslate   Boolean   @default(false)
+  xfixType            XFixType  @default(fxtwitter)
 }
 
 model trainAssignment {

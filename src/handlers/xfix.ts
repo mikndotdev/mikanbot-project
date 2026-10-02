@@ -3,10 +3,16 @@ import type { Message } from "discord.js";
 import * as Sentry from "@sentry/bun";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
+import { XFixType } from "@/generated/prisma/client";
 
 const translate = new Translate({
   key: env.GOOGLE_API_KEY,
 });
+
+const fixDomains: Record<XFixType, { x: string; twitter: string }> = {
+  fxtwitter: { x: "fixupx.com", twitter: "twittpr.com" },
+  vxtwitter: { x: "fixvx.com", twitter: "vxtwitter.com" },
+};
 
 const extractPostID = (url: string): string | null => {
   return url.match(/\/status\/(\d+)/)?.[1] ?? null;
@@ -76,9 +82,11 @@ export const xfix = async (message: Message) => {
 
   if (url.split("/").length === 4) return;
 
+  const domains = fixDomains[guildData.xfixType];
+
   url = url
-    .replace("https://x.com", "https://fixupx.com")
-    .replace("https://twitter.com", "https://twittpr.com");
+    .replace("https://x.com", `https://${domains.x}`)
+    .replace("https://twitter.com", `https://${domains.twitter}`);
 
   await message.suppressEmbeds(true).catch((error) => {
     Sentry.logger.warn("xfix could not suppress embeds", {

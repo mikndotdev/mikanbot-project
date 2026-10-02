@@ -25,7 +25,7 @@ export type CommandOption = {
   description: string;
   type: CommandOptionType;
   required?: boolean;
-  choices?: Array<{ name: string; value: string | number }>;
+  choices?: ReadonlyArray<{ name: string; value: string | number }>;
   minValue?: number;
   maxValue?: number;
   minLength?: number;

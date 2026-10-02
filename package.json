@@ -6,7 +6,9 @@
     "format": "oxfmt",
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bunx tsc && bun build --compile --external ffmpeg-static --external @discordjs/opus --external opusscript --external node-opus --external sodium-native --external sodium --external tweetnacl --external @stablelib/xchacha20poly1305 --external @noble/ciphers --outfile mikanbot src/index.ts"
+    "build": "bunx tsc && bun build --compile --external ffmpeg-static --external @discordjs/opus --external opusscript --external node-opus --external sodium-native --external sodium --external tweetnacl --external @stablelib/xchacha20poly1305 --external @noble/ciphers --outfile mikanbot src/index.ts",
+    "migrate": "bun --bun --env-file .env prisma migrate",
+    "generate": "bun --bun --env-file .env prisma generate"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^3.0.27",

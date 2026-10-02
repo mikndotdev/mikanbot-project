@@ -9,6 +9,7 @@ import {
   xfixAutoTranslateConfig,
   xfixAutoTranslateExecute,
 } from "@/commands/config/xfix-auto-translate";
+import { xfixServiceConfig, xfixServiceExecute } from "@/commands/config/xfix-service";
 
 export const config = createCommandWithSubcommands({
   name: "config",
@@ -18,4 +19,5 @@ export const config = createCommandWithSubcommands({
   .subcommand(xfixConfig, xfixExecute)
   .subcommand(preferredLanguageConfig, preferredLanguageExecute)
   .subcommand(xfixAutoTranslateConfig, xfixAutoTranslateExecute)
+  .subcommand(xfixServiceConfig, xfixServiceExecute)
   .build();
