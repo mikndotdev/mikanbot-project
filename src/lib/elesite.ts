@@ -4,6 +4,7 @@ import { getOperationalDay, secondsUntilOperationalDayEnd } from "@/lib/jst";
 
 const API = "https://www.elesite-next.com/fastapi";
 const TIMEOUT_MS = 6000;
+const USER_AGENT = "MikanBot/1.0 (+https://github.com/maamokun/mikanbot-project)";
 
 const TTL_DIA_PATTERN = 12 * 60 * 60;
 const TTL_DIAGRAM = 60 * 60;
@@ -25,6 +26,7 @@ async function elesiteGet<T>(path: string, params: QueryParams): Promise<Elesite
       if (value !== undefined) query.set(key, String(value));
     }
     const res = await fetch(`${API}/${path}?${query.toString()}`, {
+      headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (!res.ok) {

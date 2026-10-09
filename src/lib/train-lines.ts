@@ -7,15 +7,11 @@ interface RawLineSystem {
   line_names: string[];
   operators: string[];
   regions: string[];
-  day_id: number;
-  vehicles: number;
-  icon_count: number;
-  icons: string[];
+  icons: Record<string, string>;
 }
 
 interface RawTrainIcons {
   line_systems: Record<string, RawLineSystem>;
-  company_index: Record<string, string[]>;
 }
 
 const data = trainIcons as unknown as RawTrainIcons;
@@ -70,23 +66,8 @@ function buildLabel(names: string[], operators: string[]): string {
   return `${head}${rest}（${shown}${more}）`;
 }
 
-function iconKey(fileName: string): string {
-  const withoutExt = fileName.replace(/\.(png|webp)$/i, "");
-  return withoutExt.replace(/_\d{14}$/, "");
-}
-
 function buildIconIndex(system: RawLineSystem): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const url of system.icons) {
-    const fileName = url.slice(url.lastIndexOf("/") + 1);
-    const key = iconKey(decodeURIComponent(fileName));
-    if (!key) continue;
-    const existing = map.get(key);
-    if (!existing || (existing.endsWith(".png") && url.endsWith(".webp"))) {
-      map.set(key, url);
-    }
-  }
-  return map;
+  return new Map(Object.entries(system.icons));
 }
 
 export const lineSystems: Map<string, LineSystem> = new Map(
@@ -175,12 +156,7 @@ export function lookupIconByFormation(
   const system = lineSystems.get(rosenCode);
   if (!system) return null;
   const key = `${formation ?? ""}${hensei ?? ""}`;
-  const direct = system.iconsByName.get(key);
-  if (direct) return direct;
-  for (const [name, url] of system.iconsByName) {
-    if (name === key) return url;
-  }
-  return null;
+  return system.iconsByName.get(key) ?? null;
 }
 
 export function stripRouteTag(value: string | null | undefined): string {
